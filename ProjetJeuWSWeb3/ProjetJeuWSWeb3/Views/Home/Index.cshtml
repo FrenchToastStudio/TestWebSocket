@@ -1,0 +1,217 @@
+﻿<style>
+    #main {
+        display: none;
+    }
+
+    #zoneJeu {
+        display: none;
+    }
+</style>
+<div class="jumbotron">
+    <h1>WebSockets dans ASP.NET MVC</h1>
+</div>
+<div class="row" id="login">
+    <div class="col-md-8">
+        <h2>Saisissez votre alias :</h2>
+        <input type="text" id="alias" />
+        <input type="button" id="bConnecter" value="Se connecter" />
+        <div id="reponse1"></div>
+    </div>
+    <div class="col-md-4">
+
+    </div>
+</div>
+<div class="row" id="main">
+    <div class="col-md-3">
+        <span id="sAlias"></span>
+        <input type="button" id="bFermer" value="Se déconnecter" />
+        <h3>Connectés</h3>
+        <ol id="connectes">
+        </ol>
+    </div>
+    <div class="col-md-3">
+        <h3>Invitations reçues</h3>
+        <ol id="invitationsRecues"></ol>
+        <h3>Invitations envoyées</h3>
+        <ol id="invitationsEnvoyees"></ol>
+    </div>
+    <div class="col-md-4">
+        <h2>Zone de chat :</h2>
+        <div id="zoneChat"></div>
+    </div>
+    <div class="col-md-8">
+        <h2>Saisissez votre message :</h2>
+        <input type="text" id="message" />
+        <input type="button" id="bEnvoyer" value="Envoyer" />
+
+        <div id="reponse"></div>
+    </div>
+    <div class="col-md-12" id="zoneJeu">
+        <h3>Créer la meilleure phrase possible!!!</h3>
+        <div id="phrase">
+            <span id="phrase1"></span><br />
+            <input type="text" id="phrasefinale" />
+            <input type="button" id="bsubmitPhrase" value="Envoyer Phrase" />
+        </div>
+        <div id="resultat1"></div>
+        <div id="resultat2"></div>
+    </div>
+</div>
+    <script>
+        document.getElementById('connectes')
+            .addEventListener('click', event => {
+                if (event.target.className === 'membre') {
+                    envoyerInvitationA(event.target.innerHTML);
+                }
+            });
+        function ajouterConnecte(nom) {
+            document.getElementById('connectes').innerHTML += "<li class='membre' id='" + nom + "'>" + nom + "</li>";
+        }
+        function enleverConnecte(nom) {
+            document.getElementById(nom).style['display'] = 'none';
+        }
+        function ajouterInvitationRecue(nom) {
+            console.log(" INVITATION RECUE DE " + nom + "\n");
+            document.getElementById('invitationsRecues').innerHTML += "<li class='invitationRecue' id='ir_" + nom + "'>" + nom + "</li>";
+            document.getElementById('ir_' + nom).onclick = function () {
+                accepterInvitationDe(this.innerHTML);
+            };
+        }
+        function envoyerInvitationA(nom) {
+            var msg = {
+                Categorie: "INVITATION", Type: "INVITE", Data: nom
+            };
+            if (webSocket != null) {
+                console.log(alias + " INVITE " + nom + "\n");
+                webSocket.send(JSON.stringify(msg));
+            }
+        }
+        function accepterInvitationDe(nom) {
+            var msg = {
+                Categorie: "INVITATION", Type: "ACCEPT", Data: nom
+            };
+            if (webSocket != null) {
+                webSocket.send(JSON.stringify(msg));
+            }
+        }
+
+        function envoyerChat(contenu) {
+            var msg = {
+                Categorie: "MESSAGE", Type: "CHAT", Data: contenu
+            };
+            if (webSocket != null) {
+                webSocket.send(JSON.stringify(msg));
+            }
+        }
+
+        function envoyerPhrase(contenu) {
+            var msg = {
+                Categorie:"JEU", Type: "GAME", Data: contenu
+            }
+            if (webSocket != null) {
+                webSocket.send(JSON.stringify(msg));
+            }
+        }
+
+        document.getElementById('bsubmitPhrase').onclick = function () {
+            document.getElementById('bsubmitPhrase').disabled = true;
+            envoyerPhrase(document.getElementById('phrasefinale').value);
+        }
+
+        document.getElementById('bEnvoyer').onclick = function () {
+            envoyerChat(document.getElementById('message').value);
+        }
+
+        document.getElementById('bFermer').onclick = function () {
+            if (webSocket != null) {
+                webSocket.close(1000, JSON.stringify({ Categorie: "CONNECTE", Type: "QUIT", Data: alias }));
+                webSocket = null;
+            }
+        }
+
+        /////////////////////////
+        var webSocket = null;
+        var alias = null;
+        var aliasAutre = null;
+        var aQuiDeJouer = null;
+        var partieTerminee = false;
+        var message = { Categorie: null, Type: null, Data: null };
+        document.getElementById('bConnecter').onclick = function () {
+            if (webSocket == null) {
+                alias = document.getElementById('alias').value;
+                var URL = "ws://localhost:57339/api/websocket/" + alias;
+                webSocket = new WebSocket(URL);
+                webSocket.onopen = function () {
+                    document.getElementById('login').style['display'] = "none";
+                    document.getElementById('main').style['display'] = "block";
+                    document.getElementById('sAlias').innerHTML = alias;
+                }
+                webSocket.onclose = function (event) {
+                    document.getElementById('login').style['display'] = "block";
+                    document.getElementById('main').style['display'] = "none";
+                }
+                webSocket.onerror = function (event) {
+                }
+                webSocket.onmessage = function (event) {
+                    var msg = JSON.parse(event.data);
+                    switch (msg.Categorie) {
+                        case "CONNECTE":
+                            switch (msg.Type) {
+                                case "ADD":
+                                    ajouterConnecte(msg.Data);
+                                    break;
+                                case "DEL":
+                                    enleverConnecte(msg.Data);
+                                    break;
+                                case "LIST":
+                                    document.getElementById('connectes').innerHTML = '';
+                                    msg.Data.forEach((e) => { if (e != alias) ajouterConnecte(e); });
+                                    break;
+                            }
+                            break;
+                        case "MESSAGE":
+                            document.getElementById('zoneChat').innerHTML += msg.Data + "<br />";
+                        case "INVITATION":
+                            switch (msg.Type) {
+                                case "RECEIVED":
+                                    ajouterInvitationRecue(msg.Data);
+                                    break;
+                                case "REFUSED":
+                                    break;
+                                case "CANCELLED":
+                                    break;
+                                case "LIST_R":
+                                    break;
+                                case "LIST_S":
+                                    break;
+                            }
+                            break;
+                        case "JEU":
+                            switch (msg.Type) {
+                                case "START":
+                                    console.log(msg.Data);
+                                    var partie = msg.Data;
+                                    partieTerminee = false;
+                                    document.getElementById('zoneJeu').style['display'] = "block";
+                                    document.getElementById('phrase1').innerHTML = partie.phrase1.phraseInitiale;
+                                    break;
+                                case "ABANDON":
+                                    break;
+                                case "END":
+                                    break;
+                                case "GAME":
+                                    var partie = msg.Data;
+                                    if (partie.phrase1.phraseFinale !=null) {
+                                        document.getElementById('resultat1').innerHTML = "La phrase " + partie.Joueur1.Nom + " est : " + partie.phrase1.phraseFinale + ".";
+                                    }
+                                    if (partie.phrase2.phraseFinale != null) {
+                                        document.getElementById('resultat2').innerHTML = "La phrase " + partie.Joueur2.Nom+ " est : " + partie.phrase2.phraseFinale+".";
+                                    }
+                                    break;
+                            }
+                            break;
+                    }
+                }
+            }
+        };
+    </script>
