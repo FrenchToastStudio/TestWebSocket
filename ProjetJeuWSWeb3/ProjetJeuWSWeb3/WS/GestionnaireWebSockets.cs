@@ -17,6 +17,7 @@ namespace ProjetJeuWSWeb3.WS
         private Message message = new Message();
         private MessageChat messageChat = new MessageChat();
         private readonly string Alias;
+        private string idPartieActuel;
 
         public GestionnaireWebSockets(string username) : base(2048)
         {
@@ -61,6 +62,7 @@ namespace ProjetJeuWSWeb3.WS
             ArraySegment<byte> envoi = new ArraySegment<byte>(buffer2);
             await socket.SendAsync(envoi, WebSocketMessageType.Text, true, CancellationToken.None);
         }
+
         private async Task EnvoyerA(Object objet, string nom)
         {
             if (ServeurPhraseACompleter.ListeConnectes.TryGetValue(nom, out AspNetWebSocket socket))
@@ -68,9 +70,16 @@ namespace ProjetJeuWSWeb3.WS
                 await EnvoyerA(objet, socket);
             }
         }
+        private async Task EnvoyerLobby(Object objet, string idPartie) {
+            if (ServeurLobbyJeu.ListeLobby.TryGetValue(idPartie, out AspNetWebSocket socket))
+            {
+                await EnvoyerA(objet, socket);
+            }
+        }
         public async Task Receiver(AspNetWebSocketContext context)
         {
             var socket = context.WebSocket as AspNetWebSocket;
+            JeuPhraseACompleter partieEnCours;
             ServeurPhraseACompleter.AjouterConnecte(this.Alias, socket);
             await EnvoyerA(new Message { Categorie = "CONNECTE", Type = "LIST", Data = ServeurPhraseACompleter.GetNomsConnectes() }, socket);
             await EnvoyerATousDeLaPartDe(new Message { Categorie = "CONNECTE", Type = "ADD", Data = this.Alias }, socket);
@@ -98,6 +107,10 @@ namespace ProjetJeuWSWeb3.WS
                                 //TODO:
                                 //  - Supprimer les parties et les invitations de this.Alias.
                                 break;
+                            case "PARTIE":
+                                idPartieActuel = message.Data.ToString();
+                                await EnvoyerLobby(new Message { Categorie = "CONNECTER", Type = "ADD", Data = this.Alias }, message.Data.ToString());
+                                break;
                         }
                         break;
                     case "INVITATION":
@@ -117,7 +130,7 @@ namespace ProjetJeuWSWeb3.WS
                                 };
                                 List<string> listePhrases = PhrasesProvider.getListe();
                                 partie.InitRonde(listePhrases[0],listePhrases[1]);
-                                ServeurPhraseACompleter.AjouterPartie(partie);
+                                ServeurPhraseACompleter.AjouterPartie(partie, socket);
                                 await EnvoyerA(new Message { Categorie = "JEU", Type = "START", Data = partie }, joueur1);
                                 await EnvoyerA(new Message { Categorie = "JEU", Type = "START", Data = partie }, joueur2);
                                 break;
@@ -138,8 +151,19 @@ namespace ProjetJeuWSWeb3.WS
                     case "JEU":
                         switch (message.Type)
                         {
+                            case "VOTE":
+                                partieEnCours = ServeurLobbyJeu.GetPartieDe(this.idPartieActuel);
+                                if (partieEnCours != null)
+                                {
+                                    partieEnCours.voter(this.Alias, message.Data.ToString());
+                                }
+                                await EnvoyerLobby(new Message { Categorie = "JEU", Type = "VOTER", Data = this.Alias }, idPartieActuel);
+                                break;
+                            case "DEMARRER":
+                                await EnvoyerLobby(new Message { Categorie = "JEU", Type = "DEBUTER", Data = this.Alias }, idPartieActuel);
+                                break;
                             case "SUBMIT":
-                                JeuPhraseACompleter partieEnCours = ServeurPhraseACompleter.GetPartieDe(this.Alias);
+                                partieEnCours = ServeurPhraseACompleter.GetPartieDe(this.Alias);
                                 if (partieEnCours != null)
                                 {
                                     partieEnCours.CompleterPhrase(this.Alias, message.Data.ToString());
@@ -149,37 +173,13 @@ namespace ProjetJeuWSWeb3.WS
                                     string autreJoueur = (partieEnCours.Joueur1.Nom == this.Alias) ? partieEnCours.Joueur2.Nom : partieEnCours.Joueur1.Nom;
                                 }
                                 break;
-                            case "ABANDON":
-                                //TODO
-                                break;
                             case "GAME":
-                                JeuPhraseACompleter partie = ServeurPhraseACompleter.GetPartieDe(this.Alias);
+                                JeuPhraseACompleter partie = ServeurLobbyJeu.GetPartieDe(this.idPartieActuel);
+                                
                                 if (partie != null)
                                 {
-                                    string phrasePartie = message.Data.ToString();
-                                    partie.CompleterPhrase(this.Alias, phrasePartie);
-                                    if (partie.IsRondeFini())
-                                    {
-                                        int gagnant = partie.GetIDGagnant();
-                                        string nomGagnant = "";
-                                        if (gagnant == 1)
-                                        {
-                                            nomGagnant = partie.Joueur1.Nom;
-                                        }
-                                        else if (gagnant == 2)
-                                        {
-                                            nomGagnant = partie.Joueur2.Nom;
-                                        }
-                                        await EnvoyerA(new Message { Categorie = "JEU", Type = "END", Data = nomGagnant }, partie.Joueur1.Nom);
-                                        await EnvoyerA(new Message { Categorie = "JEU", Type = "END", Data = nomGagnant }, partie.Joueur2.Nom);
-                                        ServeurPhraseACompleter.EnleverPartie(partie);
-                                    }
-                                    else
-                                    {
-                                        string autreJoueur = (partie.Joueur1.Nom == this.Alias) ? partie.Joueur2.Nom : partie.Joueur1.Nom;
-                                        await EnvoyerA(new Message { Categorie = "JEU", Type = "GAME", Data = partie }, autreJoueur);
-                                        await EnvoyerA(new Message { Categorie = "JEU", Type = "GAME", Data = partie }, this.Alias);
-                                    }
+                                    partie.EnvoyerRéponse(this.Alias, message.Data.ToString());
+                                    await EnvoyerLobby(new Message { Categorie = "JEU", Type = "PHRASECOMPLETER", Data = message.Data.ToString() }, this.idPartieActuel);
                                 }
                                 break;
                         }

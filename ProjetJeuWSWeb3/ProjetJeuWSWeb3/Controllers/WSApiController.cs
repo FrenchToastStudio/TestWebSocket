@@ -28,5 +28,20 @@ namespace ProjetJeuWSWeb3.Controllers
                 return Request.CreateResponse(HttpStatusCode.BadRequest);
             }
         }
+
+        [Route("api/websocket/lobby")]
+        public HttpResponseMessage Get()
+        {
+            if (System.Web.HttpContext.Current.IsWebSocketRequest)
+            {
+                System.Web.HttpContext.Current.AcceptWebSocketRequest(new GestionnaireWebSocketsLobby().Receiver);
+
+                return Request.CreateResponse(HttpStatusCode.SwitchingProtocols);
+            }
+            else
+            {
+                return Request.CreateResponse(HttpStatusCode.BadRequest);
+            }
+        }
     }
 }

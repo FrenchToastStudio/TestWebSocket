@@ -7,13 +7,30 @@ namespace ProjetJeuWSWeb3.Models
 {
     public class JeuPhraseACompleter
     {
+        public string host { get; set; }
+
         public Joueur Joueur1 { get; set; }
         public Joueur Joueur2 { get; set; }
+
+        public string phraseACompleter { get; set; }
+
+        //liste des joeueurs
         public List<Joueur> lesJoueurs = new List<Joueur>();
+        public List<Joueur> lesSpectateur = new List<Joueur>();
+
+        //Liste des reponse des joeueur
+        public Dictionary<string, string> listeRéponses = new Dictionary<string, string>();
+        public Dictionary<string, string> listeVotes = new Dictionary<string, string>();
+
         private int idGagnant, tour;
         private bool PartieFini = false;
 
-        public Phrase phrase1 { get; set; }
+        //régle du jeu
+        private int nbTourMax = 2;
+        private int pointParVote = 100;
+        private int nbJoueurMax = 10;
+
+    public Phrase phrase1 { get; set; }
         public Phrase phrase2 { get; set; }
 
 
@@ -35,6 +52,21 @@ namespace ProjetJeuWSWeb3.Models
         public int GetIDGagnant() { return idGagnant; }
         public bool IsRondeFini() { return PartieFini; }
         public void FinirRonde(bool boolean) { this.PartieFini = boolean; }
+
+        public bool VérifierPartieFini()
+        {
+            return nbTourMax == tour;
+        }
+
+        public void EnvoyerRéponse(string joueur, string restantPhrase)
+        {
+            if (!listeRéponses.ContainsKey(joueur)) {
+                Réponse réponse = new Réponse();
+                listeRéponses.Add(joueur, restantPhrase);
+            }
+        }
+
+
         public void CompleterPhrase(string joueur,string restantPhrase) 
         {
             if (joueur == Joueur1.Nom)
@@ -45,6 +77,42 @@ namespace ProjetJeuWSWeb3.Models
                 this.phrase2.phraseFinale = this.phrase2.phraseInitiale + restantPhrase;
             }
         }
+
+        public Dictionary<string, int> ObtenirLeaderBoard()
+        {
+            Dictionary<string, int> leaderboard= new Dictionary<string, int>();
+            for (int i = 0; i < lesJoueurs.Count - 1; i++) {
+                for (int j = 0; j > lesJoueurs.Count - 1; j++) {
+                    if (lesJoueurs[j].pointage > lesJoueurs[j - 1].pointage) {
+                        Joueur temporaire = lesJoueurs[j - 1];
+                        lesJoueurs[j - 1] = lesJoueurs[j];
+                        lesJoueurs[j] = temporaire;
+                    }
+                }
+            }
+
+            return leaderboard;
+        }
+
+        internal bool vérifierSijoueurMaxAtteint()
+        {
+            return this.lesJoueurs.Count >= this.nbJoueurMax;
+        }
+
+        public void ProchainTour()
+        {
+            phraseACompleter = PhrasesProvider.getListe()[0];
+            listeRéponses = new Dictionary<string, string>();
+            listeVotes = new Dictionary<string, string>();
+            tour += 1;
+
+    }
+
+        public int GetGagnant()
+        {
+            return this.idGagnant;
+        }
+
         public void InitRonde(string phrase1, string phrase2) 
         {
             this.phrase1 = new Phrase { 
@@ -61,6 +129,66 @@ namespace ProjetJeuWSWeb3.Models
             for (int i = 0; i > lesJoueurs.Count; i++) { 
 
             }
+        }
+
+        public bool VérifierToutePhrasesJoueur()
+        {
+            return listeRéponses.Count == lesJoueurs.Count;
+        }
+
+        public void AjouterJoueur(string v)
+        {
+            Joueur unJoueur = new Joueur();
+            unJoueur.Nom = v;
+            if (lesJoueurs.Count >= nbJoueurMax)
+            {
+                unJoueur.estAudience = true;
+                lesSpectateur.Add(unJoueur);
+            }
+            else
+            {
+                unJoueur.estAudience = false;
+                lesJoueurs.Add(unJoueur);
+            }
+        }
+
+        public bool VérifierToutVote()
+        {
+            int nbVotes = lesJoueurs.Count + lesSpectateur.Count;
+            return listeVotes.Count == nbVotes;
+        }
+
+        public void voter(string alias, string data)
+        {
+
+            listeVotes.Add(alias, data);
+            
+        }
+
+        internal Dictionary<string, int> ObtenirVote()
+        {
+            Dictionary<string, int> votes = new Dictionary<string, int>();
+
+            foreach (KeyValuePair<string, string> phrase in listeVotes)
+            {
+                if (!votes.ContainsKey(phrase.Value))
+                {
+                    votes.Add(phrase.Value, 1);
+                }
+                else {
+                    votes[phrase.Value] += 1;
+                }
+            }
+
+            foreach (string réponse in listeRéponses.Values)
+            {
+                if (!votes.ContainsKey(réponse))
+                {
+                    votes.Add(réponse, 0);
+                }
+            }
+
+            return votes;
         }
     }
 }

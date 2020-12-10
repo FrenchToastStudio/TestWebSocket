@@ -14,5 +14,12 @@ namespace ProjetJeuWSWeb3.Controllers
 
             return View();
         }
+
+        public ActionResult Lobby()
+        {
+            ViewBag.Title = "Home Page";
+
+            return View();
+        }
     }
 }

@@ -1,0 +1,217 @@
+﻿
+@{
+    ViewBag.Title = "Lobby";
+}
+
+<style>
+    #creerLobby {
+        display: block;
+    }
+
+    #zonePhrase {
+        display: none;
+    }
+
+    #zoneVote {
+        display: none;
+    }
+
+    #zoneLeaderBoard {
+        display: none;
+    }
+    
+    #zoneRésultat {
+        display: none;
+    }
+</style>
+<h2 id="idPartie">Lobby</h2>
+<div class="row" id="creerLobby" >
+    <input type="button" id="bCreerLobby" value="Creer le salon" />
+</div>
+<div class="row" id="zoneDébut">
+    <ul id="connecte"></ul>
+</div>
+<div class="row" id="zonePhrase">
+    <h2>Enter ce que cette phrase vous inspire </h2>
+    <span id="phaseACompleter"></span>
+    <ul id="connectesLoby"></ul>
+</div>
+<div class="row" id="zoneVote">
+    <h2>Veuillez voter sur la phrase qui vous inspire le plus! </h2>
+    <span id="phaseACompleter"></span>
+    <ul id="connectesVote"></ul>
+</div>
+<div class="row" id="zoneResultat">
+    <ul id="votes"></ul>
+</div>
+<div class="row" id="zoneLeaderBoard">
+    <ul id="leaderboard"></ul>
+</div>
+<script>
+    var webSocket = null;
+    var idPartie = null;
+    var nbSpectateur = 0;
+    var joueurs = [];
+
+    function ajouterConnecte(nom) {
+        console.log(nom);
+        joueurs.push(nom);
+        document.getElementById('connecte').innerHTML += "<li class='membre' id='connecte" + nom + "'>" + nom + "</li>";
+        document.getElementById('connectesVote').innerHTML += "<li class='membre' id='connecteVote" + nom + "'>" + nom + "</li>";
+        document.getElementById('connectesLoby').innerHTML += "<li class='membre' id='connecteLoby" + nom + "'>" + nom + "</li>";
+    }
+
+    function ajouterSpectateur() {
+        console.log("ok shawty");
+        nbSpectateur += 1;
+        document.getElementById('nbSpectarteur').innerHTML = nbSpectateur;
+    }
+
+    function envoyerVote(nom) {
+        document.getElementById(msg.Data).style['display'] = "block";
+    }
+
+    function afficherLeaderboard(leaderboard) {
+        console.log(leaderboard);
+        var leaderBoard = leaderboard;
+        leaderBoard.forEach(element => document.getElementById('leaderboard').innerHTML += "<li class='participant' id='" + element.nom + "'>" + element.nom + + + ": " + element.pointage + "</li>");
+    }
+
+    function prochaineRonde(phrase) {
+        console.log(phrase);
+        document.getElementById('zoneDébut').style['display'] = "none";
+        document.getElementById('zonePhrase').style['display'] = "block";
+        document.getElementById('phaseACompleter').innerHTML = phrase;
+    }
+
+    function prevenirPhraseCompleter() {
+        var msg = {
+            Categorie: "JEU", Type: "PHRASECOMPLETER"
+        }
+        webSocket.send(JSON.stringify(msg));
+    }
+
+    function commencerPartie() {
+        var msg = {
+            Categorie: "JEU", Type: "START"
+        }
+        webSocket.send(JSON.stringify(msg));
+    }
+
+    function afficherPhaseVote() {
+        document.getElementById('zonePhrase').style['display'] = "none";
+        document.getElementById('zoneVote').style['display'] = "block";
+    }
+
+    function lancerProchaineRonde() {
+        var msg = {
+            Categorie: "JEU", Type: "START"
+        }
+        webSocket.send(JSON.stringify(msg));
+    }
+
+    /*
+    function genererIdPartie() {
+        var idPartie = "";
+        var alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+
+        for (var i = 0; i < 4; i++) {
+            idPartie += alphabet.charAt(Math.random() * alphabet.length);
+        }
+        return idPartie
+    }*/
+
+    document.getElementById('bCreerLobby').onclick = function () {
+        if (webSocket == null) {
+
+            var URL = "ws://localhost:57339/api/websocket/lobby/";
+            webSocket = new WebSocket(URL)
+            webSocket.onopen = function () {
+                document.getElementById('creerLobby').style['display'] = "none";
+                document.getElementById('zoneDébut').style['display'] = "block";
+            }
+            webSocket.onclose = function (event) {
+                document.getElementById('zoneLeaderBoard').style['display'] = "none";
+                document.getElementById('creerLobby').style['display'] = "block";
+            }
+
+            webSocket.onerror = function (event) {
+                //document.getElementById('console').innerHTML += "ERREUR: " + event.message + "<br />";
+            }
+
+            webSocket.onmessage = function (event) {
+                var msg = JSON.parse(event.data);
+
+                console.log(msg.Categorie);
+                console.log(msg.Type);
+                console.log(msg.Data);
+                switch (msg.Categorie) {
+                    case "JEU":
+                        switch (msg.Type) {
+                            case "NEXTROUND":
+                                var partie = msg.Data;
+                                prochaineRonde(partie.phraseACompleter);
+                                break;
+                            case "PHRASECOMPLETER":
+                                prevenirPhraseCompleter();
+                                break;
+                            case "AFFICHERVOTE":
+                                votes = msg.Data; zoneVote
+                                document.getElementById('zoneVote').style['display'] = 'none';
+                                document.getElementById('zoneResultat').style['display'] = 'block';
+                                for (var key in votes) {
+                                    document.getElementById('votes').innerHTML += "<li class='votes'>" + key + ": "+ votes[key] + "</li>";
+                                }
+
+                                setTimeout(lancerProchaineRonde, 3000)
+                                break;
+                            case "JOUEURVOTE":
+                                ajouterJoueurVote(msg.data);
+                                break;
+                            case "JEUXTERMINER":
+                                afficherLeaderboard(msg.Data);
+                                break;
+                            case "DEBUTER":
+                                console.log("Let the game begin");
+                                commencerPartie();
+                                break;
+                            case "PHASEVOTE":
+                                afficherPhaseVote()
+                                break;
+                            case "VOTER":
+                                var msg = {
+                                    Categorie: "JEU", Type: "VOTECOMPLETER", Data: msg.Data
+                                }
+                                webSocket.send(JSON.stringify(msg));
+                                break;
+                        }
+                        break;
+                    case "CONNECTER":
+                        switch (msg.Type) {
+                            case "ADD":
+                                var msg = {
+                                    Categorie: "CONNECTER", Type: "ADDJOUEUR", Data: msg.Data
+                                }
+                                webSocket.send(JSON.stringify(msg));
+                                break;
+                            case "NOUVEAUJOUEUR":
+                                console.log("passe ici");
+                                ajouterConnecte(msg.Data);
+                                break;
+                            case "NOUVEAUSPECTATEUR":
+                                ajouterSpectateur();
+                                break;
+                        }
+                        break;
+                    case "LOBBY":
+                        switch (msg.Type) {
+                            case "DEBUTER":
+                                document.getElementById('idPartie').innerHTML += ": " + msg.Data;
+                                break;
+                        }
+                        break;
+                }
+            }
+        }
+    }
+</script>

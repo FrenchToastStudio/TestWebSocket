@@ -58,7 +58,7 @@ namespace ProjetJeuWSWeb3.Models
         }
         #endregion
         #region Parties
-        public static bool AjouterPartie(JeuPhraseACompleter partie)
+        public static bool AjouterPartie(JeuPhraseACompleter partie, AspNetWebSocket socket)
         {
             if (PartiesEnCours.Contains(partie))
             {
