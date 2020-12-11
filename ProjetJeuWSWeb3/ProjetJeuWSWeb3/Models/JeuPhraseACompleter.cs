@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Web;
 
@@ -22,7 +23,7 @@ namespace ProjetJeuWSWeb3.Models
         public Dictionary<string, string> listeRéponses = new Dictionary<string, string>();
         public Dictionary<string, string> listeVotes = new Dictionary<string, string>();
 
-        private int idGagnant, tour;
+        private int tour=0;
         private bool PartieFini = false;
 
         //régle du jeu
@@ -48,10 +49,6 @@ namespace ProjetJeuWSWeb3.Models
             }
             return false;
         }
-        public int getTour() { return tour; }
-        public int GetIDGagnant() { return idGagnant; }
-        public bool IsRondeFini() { return PartieFini; }
-        public void FinirRonde(bool boolean) { this.PartieFini = boolean; }
 
         public bool VérifierPartieFini()
         {
@@ -82,16 +79,26 @@ namespace ProjetJeuWSWeb3.Models
         {
             Dictionary<string, int> leaderboard= new Dictionary<string, int>();
             for (int i = 0; i < lesJoueurs.Count - 1; i++) {
-                for (int j = 0; j > lesJoueurs.Count - 1; j++) {
+                for (int j = 0; j > lesJoueurs.Count - 1; j++) 
+                {
                     if (lesJoueurs[j].pointage > lesJoueurs[j - 1].pointage) {
                         Joueur temporaire = lesJoueurs[j - 1];
-                        lesJoueurs[j - 1] = lesJoueurs[j];
+                       lesJoueurs[j - 1] = lesJoueurs[j];
                         lesJoueurs[j] = temporaire;
                     }
                 }
             }
-
             return leaderboard;
+        }
+
+        public void changerPointJoueur(int id,int point) 
+        {
+            lesJoueurs[id].pointage = point;
+        }
+
+        public List<Joueur> formatterLeaderBoard() 
+        {
+            return lesJoueurs;
         }
 
         internal bool vérifierSijoueurMaxAtteint()
@@ -101,34 +108,12 @@ namespace ProjetJeuWSWeb3.Models
 
         public void ProchainTour()
         {
-            phraseACompleter = PhrasesProvider.getListe()[0];
+            formatterLeaderBoard();
+            phraseACompleter = PhrasesProvider.getRandomPhrase();
             listeRéponses = new Dictionary<string, string>();
             listeVotes = new Dictionary<string, string>();
             tour += 1;
 
-    }
-
-        public int GetGagnant()
-        {
-            return this.idGagnant;
-        }
-
-        public void InitRonde(string phrase1, string phrase2) 
-        {
-            this.phrase1 = new Phrase { 
-                phraseInitiale = phrase1,
-                pointage = 0
-            };
-            this.phrase2 = new Phrase
-            {
-                phraseInitiale = phrase2,
-                pointage = 0
-            };
-
-            //TODO AJOUTER RANDOM POUR CHOISIR LES DEUX JOUEURS DE LA LISTE
-            for (int i = 0; i > lesJoueurs.Count; i++) { 
-
-            }
         }
 
         public bool VérifierToutePhrasesJoueur()
@@ -160,24 +145,27 @@ namespace ProjetJeuWSWeb3.Models
 
         public void voter(string alias, string data)
         {
-
             listeVotes.Add(alias, data);
-            
         }
 
         internal Dictionary<string, int> ObtenirVote()
         {
             Dictionary<string, int> votes = new Dictionary<string, int>();
-
+            int index = 0;
             foreach (KeyValuePair<string, string> phrase in listeVotes)
             {
                 if (!votes.ContainsKey(phrase.Value))
                 {
                     votes.Add(phrase.Value, 1);
+                    lesJoueurs[index].pointage += votes[phrase.Value];
                 }
                 else {
                     votes[phrase.Value] += 1;
+                    lesJoueurs[index].pointage += votes[phrase.Value];
                 }
+                Debug.Write(votes.Count);
+                
+                index++;
             }
 
             foreach (string réponse in listeRéponses.Values)
@@ -187,7 +175,6 @@ namespace ProjetJeuWSWeb3.Models
                     votes.Add(réponse, 0);
                 }
             }
-
             return votes;
         }
     }

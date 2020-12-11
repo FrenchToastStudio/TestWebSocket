@@ -38,12 +38,6 @@
         <ol id="connectes">
         </ol>
     </div>
-    <div class="col-md-3">
-        <h3>Invitations reçues</h3>
-        <ol id="invitationsRecues"></ol>
-        <h3>Invitations envoyées</h3>
-        <ol id="invitationsEnvoyees"></ol>
-    </div>
     <div class="col-md-4">
         <h2>Zone de chat :</h2>
         <div id="zoneChat"></div>
@@ -62,7 +56,7 @@
     <div class="col-md-12" id="zoneJeu">
         <h3>Créer la meilleure phrase possible!!!</h3>
         <div id="phrase">
-            <span id="phrase1"></span><br />
+            <h1 id="phrase1"></h1><br />
             <input type="text" id="phrasefinale" />
             <input type="button" id="bsubmitPhrase" value="Envoyer Phrase" />
         </div>
@@ -83,30 +77,6 @@
         }
         function enleverConnecte(nom) {
             document.getElementById(nom).style['display'] = 'none';
-        }
-        function ajouterInvitationRecue(nom) {
-            console.log(" INVITATION RECUE DE " + nom + "\n");
-            document.getElementById('invitationsRecues').innerHTML += "<li class='invitationRecue' id='ir_" + nom + "'>" + nom + "</li>";
-            document.getElementById('ir_' + nom).onclick = function () {
-                accepterInvitationDe(this.innerHTML);
-            };
-        }
-        function envoyerInvitationA(nom) {
-            var msg = {
-                Categorie: "INVITATION", Type: "INVITE", Data: nom
-            };
-            if (webSocket != null) {
-                console.log(alias + " INVITE " + nom + "\n");
-                webSocket.send(JSON.stringify(msg));
-            }
-        }
-        function accepterInvitationDe(nom) {
-            var msg = {
-                Categorie: "INVITATION", Type: "ACCEPT", Data: nom
-            };
-            if (webSocket != null) {
-                webSocket.send(JSON.stringify(msg));
-            }
         }
 
         function envoyerChat(contenu) {
@@ -165,7 +135,8 @@
         document.getElementById('bsubmitPhrase').onclick = function () {
             document.getElementById('bsubmitPhrase').disabled = true;
             document.getElementById('zoneJeu').style['display'] = "none";
-            envoyerPhrase(document.getElementById('phrasefinale').value);
+            var finalString = document.getElementById('phrase1').innerHTML + " " + document.getElementById('phrasefinale').value;
+            envoyerPhrase(finalString);
         }
 
         
@@ -252,23 +223,15 @@
                                     break;
                             }
                             break;
-                        case "MESSAGE":
-                            document.getElementById('zoneChat').innerHTML += msg.Data + "<br />";
-                        case "INVITATION":
+                        case "CONNECTER":
                             switch (msg.Type) {
-                                case "RECEIVED":
-                                    ajouterInvitationRecue(msg.Data);
-                                    break;
-                                case "REFUSED":
-                                    break;
-                                case "CANCELLED":
-                                    break;
-                                case "LIST_R":
-                                    break;
-                                case "LIST_S":
+                                case "NOUVEAUSPECTATEUR":
+                                    document.getElementById('zoneJeu').style['display'] = "block";
                                     break;
                             }
                             break;
+                        case "MESSAGE":
+                            document.getElementById('zoneChat').innerHTML += msg.Data + "<br />";
                         case "JEU":
                             switch (msg.Type) {
                                 case "START":
@@ -278,10 +241,11 @@
                                     cacherTouteZone();
                                     document.getElementById('bsubmitPhrase').disabled = false;
                                     document.getElementById('zoneJeu').style['display'] = "block";
+                                    document.getElementById('phrase1').innerHTML = partie.phraseACompleter;
                                     break;
                                 case "ABANDON":
                                     break;
-                                case "END":
+                                case "JEUXTERMINER":
                                     break;
                                 case "GAME":
                                     var partie = msg.Data;

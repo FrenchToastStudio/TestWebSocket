@@ -187,7 +187,7 @@
     <Compile Include="Models\MessageChat.cs" />
     <Compile Include="Models\Phrase.cs" />
     <Compile Include="Models\PhrasesProvider.cs" />
-    <Compile Include="Models\ServeurPhraseACompleter.cs" />
+    <Compile Include="Models\ServeurChat.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="WS\GestionnaireWebSocketsLobby.cs" />
     <Compile Include="WS\GestionnaireWebSockets.cs" />

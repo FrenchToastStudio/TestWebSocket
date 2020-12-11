@@ -34,7 +34,7 @@ namespace ProjetJeuWSWeb3.WS
 
         private async Task EnvoyerA(Object objet, string nom)
         {
-            if (ServeurPhraseACompleter.ListeConnectes.TryGetValue(nom, out AspNetWebSocket socket))
+            if (ServeurChat.ListeConnectes.TryGetValue(nom, out AspNetWebSocket socket))
             {
                 await EnvoyerA(objet, socket);
             }
@@ -121,14 +121,12 @@ namespace ProjetJeuWSWeb3.WS
                                 }
                                 break;
                             case "VOTECOMPLETER":
-
                                 jeu = ServeurLobbyJeu.GetPartieDe(this.idPartie);
                                 if (jeu != null)
                                 {
                                     
                                     if (jeu.VérifierToutVote())
                                     {
-
                                         if (jeu.VérifierPartieFini())
                                         {
                                             await EnvoyerA(new Message { Categorie = "JEU", Type = "PARTIETERMINER", Data = jeu.ObtenirVote() }, socket);
@@ -157,7 +155,15 @@ namespace ProjetJeuWSWeb3.WS
                                 }
                                 break;
                             case "JEUXTERMINER":
-                                break;
+                                jeu = ServeurLobbyJeu.GetPartieDe(this.idPartie);
+                                if (jeu != null) {
+                                    await EnvoyerA(new Message { Categorie = "JEU", Type = "JEUXTERMINER", Data = jeu.formatterLeaderBoard() }, socket);
+                                    foreach (Joueur joueur in jeu.lesJoueurs)
+                                    {
+                                        await EnvoyerA(new Message { Categorie = "JEU", Type = "JEUXTERMINER", Data = jeu.formatterLeaderBoard() }, joueur.Nom);
+                                    }
+                                }
+                                    break;
 
 
                         }

@@ -32,10 +32,10 @@ namespace ProjetJeuWSWeb3.WS
             byte[] buffer2 = Encoding.UTF8.GetBytes(message);
             ArraySegment<byte> envoi = new ArraySegment<byte>(buffer2);
 
-            IEnumerator<string> it = ServeurPhraseACompleter.ListeConnectes.Keys.GetEnumerator();
+            IEnumerator<string> it = ServeurChat.ListeConnectes.Keys.GetEnumerator();
             while (it.MoveNext())
             {
-                await ServeurPhraseACompleter.ListeConnectes[it.Current].SendAsync(envoi, WebSocketMessageType.Text, true, CancellationToken.None);
+                await ServeurChat.ListeConnectes[it.Current].SendAsync(envoi, WebSocketMessageType.Text, true, CancellationToken.None);
             }
         }
         private async Task EnvoyerATousDeLaPartDe(Object objet, AspNetWebSocket socket)
@@ -45,12 +45,12 @@ namespace ProjetJeuWSWeb3.WS
             byte[] buffer2 = Encoding.UTF8.GetBytes(message);
             ArraySegment<byte> envoi = new ArraySegment<byte>(buffer2);
 
-            IEnumerator<string> it = ServeurPhraseACompleter.ListeConnectes.Keys.GetEnumerator();
+            IEnumerator<string> it = ServeurChat.ListeConnectes.Keys.GetEnumerator();
             while (it.MoveNext())
             {
-                if (ServeurPhraseACompleter.ListeConnectes[it.Current] != socket)
+                if (ServeurChat.ListeConnectes[it.Current] != socket)
                 {
-                    await ServeurPhraseACompleter.ListeConnectes[it.Current].SendAsync(envoi, WebSocketMessageType.Text, true, CancellationToken.None);
+                    await ServeurChat.ListeConnectes[it.Current].SendAsync(envoi, WebSocketMessageType.Text, true, CancellationToken.None);
                 }
             }
         }
@@ -65,7 +65,7 @@ namespace ProjetJeuWSWeb3.WS
 
         private async Task EnvoyerA(Object objet, string nom)
         {
-            if (ServeurPhraseACompleter.ListeConnectes.TryGetValue(nom, out AspNetWebSocket socket))
+            if (ServeurChat.ListeConnectes.TryGetValue(nom, out AspNetWebSocket socket))
             {
                 await EnvoyerA(objet, socket);
             }
@@ -80,8 +80,8 @@ namespace ProjetJeuWSWeb3.WS
         {
             var socket = context.WebSocket as AspNetWebSocket;
             JeuPhraseACompleter partieEnCours;
-            ServeurPhraseACompleter.AjouterConnecte(this.Alias, socket);
-            await EnvoyerA(new Message { Categorie = "CONNECTE", Type = "LIST", Data = ServeurPhraseACompleter.GetNomsConnectes() }, socket);
+            ServeurChat.AjouterConnecte(this.Alias, socket);
+            await EnvoyerA(new Message { Categorie = "CONNECTE", Type = "LIST", Data = ServeurChat.GetNomsConnectes() }, socket);
             await EnvoyerATousDeLaPartDe(new Message { Categorie = "CONNECTE", Type = "ADD", Data = this.Alias }, socket);
 
             ArraySegment<byte> bufferDeReception = new ArraySegment<byte>(new byte[2048]);
@@ -113,35 +113,6 @@ namespace ProjetJeuWSWeb3.WS
                                 break;
                         }
                         break;
-                    case "INVITATION":
-                        switch (message.Type)
-                        {
-                            case "INVITE":
-                                ServeurPhraseACompleter.AjouterInvitation(this.Alias, message.Data.ToString());
-                                await EnvoyerA(new Message { Categorie = "INVITATION", Type = "RECEIVED", Data = this.Alias }, message.Data.ToString());
-                                break;
-                            case "ACCEPT":
-                                string joueur1 = this.Alias,
-                                       joueur2 = message.Data.ToString();
-                                JeuPhraseACompleter partie = new JeuPhraseACompleter
-                                {
-                                    Joueur1 = new Joueur { Nom = joueur1, pointage = 0 },
-                                    Joueur2 = new Joueur { Nom = joueur2, pointage = 0 }
-                                };
-                                List<string> listePhrases = PhrasesProvider.getListe();
-                                partie.InitRonde(listePhrases[0],listePhrases[1]);
-                                ServeurPhraseACompleter.AjouterPartie(partie, socket);
-                                await EnvoyerA(new Message { Categorie = "JEU", Type = "START", Data = partie }, joueur1);
-                                await EnvoyerA(new Message { Categorie = "JEU", Type = "START", Data = partie }, joueur2);
-                                break;
-                            case "REFUSE":
-                                //TODO
-                                break;
-                            case "CANCEL":
-                                //TODO
-                                break;
-                        }
-                        break;
                     case "MESSAGE":
                         this.messageChat.dateMessage = DateTime.Now;
                         this.messageChat.Contenu = message.Data.ToString();
@@ -162,17 +133,6 @@ namespace ProjetJeuWSWeb3.WS
                             case "DEMARRER":
                                 await EnvoyerLobby(new Message { Categorie = "JEU", Type = "DEBUTER", Data = this.Alias }, idPartieActuel);
                                 break;
-                            case "SUBMIT":
-                                partieEnCours = ServeurPhraseACompleter.GetPartieDe(this.Alias);
-                                if (partieEnCours != null)
-                                {
-                                    partieEnCours.CompleterPhrase(this.Alias, message.Data.ToString());
-                                }
-                                else
-                                {
-                                    string autreJoueur = (partieEnCours.Joueur1.Nom == this.Alias) ? partieEnCours.Joueur2.Nom : partieEnCours.Joueur1.Nom;
-                                }
-                                break;
                             case "GAME":
                                 JeuPhraseACompleter partie = ServeurLobbyJeu.GetPartieDe(this.idPartieActuel);
                                 
@@ -182,13 +142,23 @@ namespace ProjetJeuWSWeb3.WS
                                     await EnvoyerLobby(new Message { Categorie = "JEU", Type = "PHRASECOMPLETER", Data = message.Data.ToString() }, this.idPartieActuel);
                                 }
                                 break;
+                            case "FIN":
+                                partieEnCours = ServeurLobbyJeu.GetPartieDe(this.idPartieActuel);
+
+                                if (partieEnCours != null)
+                                {
+                                    //lapartie.EnvoyerRéponse(this.Alias, message.Data.ToString());
+                                    await EnvoyerLobby(new Message { Categorie = "JEU", Type = "END", Data = partieEnCours.formatterLeaderBoard() }, this.idPartieActuel);
+                                }
+                                Debug.Write("GSWS");
+                                break;
                         }
                         break;
                 }
             }
             await socket.CloseAsync(WebSocketCloseStatus.NormalClosure, "", CancellationToken.None);
             await EnvoyerATousDeLaPartDe(new Message { Categorie = "CONNECTE", Type = "DEL", Data = this.Alias }, socket);
-            ServeurPhraseACompleter.ListeConnectes.Remove(this.Alias);
+            ServeurChat.ListeConnectes.Remove(this.Alias);
         }
     }
 }

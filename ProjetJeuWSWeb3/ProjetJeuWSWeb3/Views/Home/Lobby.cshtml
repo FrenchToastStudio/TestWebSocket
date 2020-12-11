@@ -32,13 +32,15 @@
     <ul id="connecte"></ul>
 </div>
 <div class="row" id="zonePhrase">
-    <h2>Enter ce que cette phrase vous inspire </h2>
-    <span id="phaseACompleter"></span>
-    <ul id="connectesLoby"></ul>
+    <h2>Les joueurs dans cette ronde :</h2>
+    <ul id="connectesLoby"></ul><br/>
+    <h2>Entrer ce que cette phrase vous inspire </h2>
+    <h2 id="phaseACompleter"></h2>
 </div>
 <div class="row" id="zoneVote">
     <h2>Veuillez voter sur la phrase qui vous inspire le plus! </h2>
     <span id="phaseACompleter"></span>
+    <ul id="phraseRecus"></ul>
     <ul id="connectesVote"></ul>
 </div>
 <div class="row" id="zoneResultat">
@@ -46,6 +48,11 @@
 </div>
 <div class="row" id="zoneLeaderBoard">
     <ul id="leaderboard"></ul>
+</div>
+<div class="row" id="zonePublic">
+    <input type="button" id="bfinirJeu" value="Finir le jeu" />
+    <input type="button" id="bcacher" value="Cacher leaderboard" />
+    <span id="nbSpectarteur"></span>
 </div>
 <script>
     var webSocket = null;
@@ -74,7 +81,8 @@
     function afficherLeaderboard(leaderboard) {
         console.log(leaderboard);
         var leaderBoard = leaderboard;
-        leaderBoard.forEach(element => document.getElementById('leaderboard').innerHTML += "<li class='participant' id='" + element.nom + "'>" + element.nom + + + ": " + element.pointage + "</li>");
+        document.getElementById('zoneLeaderBoard').style['display'] = "block";
+        leaderBoard.forEach(element => document.getElementById('leaderboard').innerHTML += "<li class='participant' id='" + element.Nom + "'>" + element.Nom  + " : " + element.pointage + "</li>");
     }
 
     function prochaineRonde(phrase) {
@@ -110,16 +118,20 @@
         webSocket.send(JSON.stringify(msg));
     }
 
-    /*
-    function genererIdPartie() {
-        var idPartie = "";
-        var alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-
-        for (var i = 0; i < 4; i++) {
-            idPartie += alphabet.charAt(Math.random() * alphabet.length);
+    function finirLeJeu() {
+        var msg = {
+            Categorie: "JEU", Type: "JEUXTERMINER"
         }
-        return idPartie
-    }*/
+        webSocket.send(JSON.stringify(msg));
+    }
+
+    document.getElementById('bfinirJeu').onclick = function () {
+        finirLeJeu();
+    }
+
+    document.getElementById('bcacher').onclick = function () {
+        document.getElementById('leaderboard').innerHTML = "";
+    }
 
     document.getElementById('bCreerLobby').onclick = function () {
         if (webSocket == null) {
