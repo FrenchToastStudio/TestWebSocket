@@ -9,6 +9,9 @@
     #zoneVote {
         display: none;
     }
+    #zonePublic {
+        display:none;
+    }
     #bsubmitDemmarerPartie {
         display: none;
     }
@@ -60,18 +63,15 @@
             <input type="text" id="phrasefinale" />
             <input type="button" id="bsubmitPhrase" value="Envoyer Phrase" />
         </div>
-        
     </div>
-    <div id="zoneVote">
+    <div class="col-md-12" id="zonePublic">
+        <h3>Zone Public</h3>
+        <div id="score"></div>
+    </div>
+    <div class="col-md-12" id="zoneVote">
         <ul id="votes"></ul>
     </div>
     <script>
-        document.getElementById('connectes')
-            .addEventListener('click', event => {
-                if (event.target.className === 'membre') {
-                    envoyerInvitationA(event.target.innerHTML);
-                }
-            });
         function ajouterConnecte(nom) {
             document.getElementById('connectes').innerHTML += "<li class='membre' id='" + nom + "'>" + nom + "</li>";
         }
@@ -86,6 +86,11 @@
             if (webSocket != null) {
                 webSocket.send(JSON.stringify(msg));
             }
+        }
+
+        function afficherPublic()
+        {
+            document.getElementById('zonePublic').style['display'] = 'block';
         }
 
         function prochaineRonde(phraseACompleter) {
@@ -115,7 +120,6 @@
         }
 
         function voterPourPhrase(phrase) {
-            document.getElementById('votes').innerHTML = "";
             document.getElementById('zoneVote').style['display'] = "none";
             var msg = {
                 Categorie: "JEU", Type: "VOTE", Data: phrase
@@ -127,9 +131,9 @@
         }
         function setOnClick(id, cle) {
             document.getElementById('vt_' + id).onclick = function () {
-                    voterPourPhrase(cle);
-                    console.log("click: " + cle);
-                };
+                voterPourPhrase(cle);
+                console.log("click: " + cle);
+            };
         }
 
         document.getElementById('bsubmitPhrase').onclick = function () {
@@ -226,7 +230,7 @@
                         case "CONNECTER":
                             switch (msg.Type) {
                                 case "NOUVEAUSPECTATEUR":
-                                    document.getElementById('zoneJeu').style['display'] = "block";
+                                    afficherPublic();
                                     break;
                             }
                             break;
@@ -248,13 +252,6 @@
                                 case "JEUXTERMINER":
                                     break;
                                 case "GAME":
-                                    var partie = msg.Data;
-                                    if (partie.phrase1.phraseFinale !=null) {
-                                        document.getElementById('resultat1').innerHTML = "La phrase " + partie.Joueur1.Nom + " est : " + partie.phrase1.phraseFinale + ".";
-                                    }
-                                    if (partie.phrase2.phraseFinale != null) {
-                                        document.getElementById('resultat2').innerHTML = "La phrase " + partie.Joueur2.Nom+ " est : " + partie.phrase2.phraseFinale+".";
-                                    }
                                     break;
 
                                 case "NEXTROUND":
@@ -268,9 +265,32 @@
                                             console.log("before: " + phrases[key]);
                                             setOnClick(key, phrases[key]);
                                         }
-                                        
                                     }
                                     document.getElementById('zoneVote').style['display'] = "block";
+                                    break;
+                            }
+                            break;
+                        case "PUBLIC":
+                            switch (msg.Type)
+                            {
+                                case "START":
+                                    afficherPublic();
+                                    break;
+                                case "PHASEVOTE":
+                                    var phrases = msg.Data;
+                                    document.getElementById('votes').innerHTML = "";
+                                    for(var key in phrases) {
+                                        if (key != alias) {
+                                            document.getElementById('votes').innerHTML += "<li class='membre' id='vt_" + key + "'>" + phrases[key] + "</li>";
+                                            console.log("before: " + phrases[key]);
+                                            setOnClick(key, phrases[key]);
+                                        }
+                                    }
+                                    document.getElementById('zoneVote').style['display'] = "block";
+                                    break;
+                                case "SCORE":
+                                    console.log("stats recus");
+                                    break;
                             }
                             break;
                     }

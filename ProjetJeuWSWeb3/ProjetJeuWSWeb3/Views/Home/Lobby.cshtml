@@ -50,7 +50,7 @@
     <ul id="leaderboard"></ul>
 </div>
 <div class="row" id="zonePublic">
-    <input type="button" id="bfinirJeu" value="Finir le jeu" />
+    <input type="button" id="bleader" value="Afficher Leaderboard" />
     <input type="button" id="bcacher" value="Cacher leaderboard" />
     <span id="nbSpectarteur"></span>
 </div>
@@ -125,7 +125,7 @@
         webSocket.send(JSON.stringify(msg));
     }
 
-    document.getElementById('bfinirJeu').onclick = function () {
+    document.getElementById('bleader').onclick = function () {
         finirLeJeu();
     }
 

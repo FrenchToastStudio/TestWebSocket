@@ -102,6 +102,10 @@ namespace ProjetJeuWSWeb3.WS
                                         await EnvoyerA(new Message { Categorie = "JEU", Type = "START", Data = jeu }, joueur.Nom);
 
                                     }
+                                    foreach (Joueur foule in jeu.lesSpectateur) 
+                                    {
+                                        await EnvoyerA(new Message { Categorie = "PUBLIC", Type = "START", Data = jeu },foule.Nom);
+                                    }
                                     await EnvoyerA(new Message { Categorie = "JEU", Type = "NEXTROUND", Data = jeu }, socket);
                                 }
                                 break;
@@ -116,6 +120,10 @@ namespace ProjetJeuWSWeb3.WS
                                         foreach (Joueur joueur in jeu.lesJoueurs)
                                         {
                                             await EnvoyerA(new Message { Categorie = "JEU", Type = "PHASEVOTE", Data = jeu.listeRéponses }, joueur.Nom);
+                                        }
+                                        foreach(Joueur foule in jeu.lesSpectateur)
+                                        {
+                                            await EnvoyerA(new Message { Categorie = "PUBLIC", Type = "PHASEVOTE", Data = jeu.listeRéponses }, foule.Nom);
                                         }
                                     }
                                 }
@@ -140,6 +148,10 @@ namespace ProjetJeuWSWeb3.WS
                                             foreach (Joueur joueur in jeu.lesJoueurs)
                                             {
                                                 await EnvoyerA(new Message { Categorie = "JEU", Type = "AFFICHERVOTE", Data = jeu.ObtenirVote() }, joueur.Nom);
+                                            }
+                                            foreach (Joueur joueur in jeu.lesSpectateur) 
+                                            {
+                                                await EnvoyerA(new Message { Categorie = "PUBLIC", Type = "SCORE", Data = jeu.ObtenirVote() }, joueur.Nom);
                                             }
                                             jeu.ProchainTour();
                                         }

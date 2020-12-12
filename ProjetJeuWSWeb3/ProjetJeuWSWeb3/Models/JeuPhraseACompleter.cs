@@ -10,9 +10,6 @@ namespace ProjetJeuWSWeb3.Models
     {
         public string host { get; set; }
 
-        public Joueur Joueur1 { get; set; }
-        public Joueur Joueur2 { get; set; }
-
         public string phraseACompleter { get; set; }
 
         //liste des joeueurs
@@ -27,17 +24,13 @@ namespace ProjetJeuWSWeb3.Models
         private bool PartieFini = false;
 
         //régle du jeu
-        private int nbTourMax = 2;
+        private int nbTourMax = 10;
         private int pointParVote = 100;
-        private int nbJoueurMax = 10;
+        private int nbJoueurMax = 2;
 
     public Phrase phrase1 { get; set; }
         public Phrase phrase2 { get; set; }
 
-
-        public bool ParticipeRondeCourante(string nom) {
-            return nom.Equals(Joueur1.Nom) || nom.Equals(Joueur2.Nom);
-        }
         public bool EstDansPartie(string nom) 
         {
             for (int i =0;i<lesJoueurs.Count;i++) 
@@ -60,18 +53,6 @@ namespace ProjetJeuWSWeb3.Models
             if (!listeRéponses.ContainsKey(joueur)) {
                 Réponse réponse = new Réponse();
                 listeRéponses.Add(joueur, restantPhrase);
-            }
-        }
-
-
-        public void CompleterPhrase(string joueur,string restantPhrase) 
-        {
-            if (joueur == Joueur1.Nom)
-            {
-                this.phrase1.phraseFinale = this.phrase1.phraseInitiale + restantPhrase;
-            } else if (joueur == Joueur2.Nom) 
-            {
-                this.phrase2.phraseFinale = this.phrase2.phraseInitiale + restantPhrase;
             }
         }
 
@@ -151,21 +132,15 @@ namespace ProjetJeuWSWeb3.Models
         internal Dictionary<string, int> ObtenirVote()
         {
             Dictionary<string, int> votes = new Dictionary<string, int>();
-            int index = 0;
             foreach (KeyValuePair<string, string> phrase in listeVotes)
             {
                 if (!votes.ContainsKey(phrase.Value))
                 {
                     votes.Add(phrase.Value, 1);
-                    lesJoueurs[index].pointage += votes[phrase.Value];
                 }
                 else {
                     votes[phrase.Value] += 1;
-                    lesJoueurs[index].pointage += votes[phrase.Value];
                 }
-                Debug.Write(votes.Count);
-                
-                index++;
             }
 
             foreach (string réponse in listeRéponses.Values)
