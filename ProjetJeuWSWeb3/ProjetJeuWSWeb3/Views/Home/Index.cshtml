@@ -119,19 +119,20 @@
             }
         }
 
-        function voterPourPhrase(phrase) {
+        function voterPourPhrase(id) {
             document.getElementById('zoneVote').style['display'] = "none";
+
             var msg = {
-                Categorie: "JEU", Type: "VOTE", Data: phrase
+                Categorie: "JEU", Type: "VOTE", Data: id
             }
             if (webSocket != null) {
                 webSocket.send(JSON.stringify(msg));
             }
 
         }
-        function setOnClick(id, cle) {
+        function setOnClick(id) {
             document.getElementById('vt_' + id).onclick = function () {
-                voterPourPhrase(cle);
+                voterPourPhrase(id);
                 console.log("click: " + cle);
             };
         }
@@ -147,11 +148,12 @@
 
         document.getElementById('bConnecterLobby').onclick = function () {
             document.getElementById('bConnecterLobby').disabled = true;
-            console.log(document.getElementById('numeroLobby').value);
+            
             var msg = {
                 Categorie: "CONNECTE", Type: "PARTIE", Data: document.getElementById('numeroLobby').value
             }
             if (webSocket != null) {
+                console.log(document.getElementById('numeroLobby').value);
                 webSocket.send(JSON.stringify(msg));
             }
         }
@@ -180,8 +182,6 @@
         /////////////////////////
         var webSocket = null;
         var alias = null;
-        var aliasAutre = null;
-        var aQuiDeJouer = null;
         var partieTerminee = false;
         var message = { Categorie: null, Type: null, Data: null };
         document.getElementById('bConnecter').onclick = function () {
@@ -263,7 +263,7 @@
                                         if (key != alias) {
                                             document.getElementById('votes').innerHTML += "<li class='membre' id='vt_" + key + "'>" + phrases[key] + "</li>";
                                             console.log("before: " + phrases[key]);
-                                            setOnClick(key, phrases[key]);
+                                            setOnClick(key);
                                         }
                                     }
                                     document.getElementById('zoneVote').style['display'] = "block";

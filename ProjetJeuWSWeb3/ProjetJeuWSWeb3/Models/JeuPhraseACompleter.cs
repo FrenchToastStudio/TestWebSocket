@@ -21,15 +21,13 @@ namespace ProjetJeuWSWeb3.Models
         public Dictionary<string, string> listeVotes = new Dictionary<string, string>();
 
         private int tour=0;
-        private bool PartieFini = false;
+        private bool PartieDébuter = false;
 
         //régle du jeu
         private int nbTourMax = 10;
         private int pointParVote = 100;
-        private int nbJoueurMax = 2;
+        private int nbJoueurMax = 10;
 
-    public Phrase phrase1 { get; set; }
-        public Phrase phrase2 { get; set; }
 
         public bool EstDansPartie(string nom) 
         {
@@ -46,6 +44,11 @@ namespace ProjetJeuWSWeb3.Models
         public bool VérifierPartieFini()
         {
             return nbTourMax == tour;
+        }
+
+        public bool VréifierPartieDébuter() 
+        {
+            return PartieDébuter;
         }
 
         public void EnvoyerRéponse(string joueur, string restantPhrase)
@@ -90,6 +93,7 @@ namespace ProjetJeuWSWeb3.Models
         public void ProchainTour()
         {
             formatterLeaderBoard();
+            PartieDébuter = true;
             phraseACompleter = PhrasesProvider.getRandomPhrase();
             listeRéponses = new Dictionary<string, string>();
             listeVotes = new Dictionary<string, string>();
@@ -106,7 +110,7 @@ namespace ProjetJeuWSWeb3.Models
         {
             Joueur unJoueur = new Joueur();
             unJoueur.Nom = v;
-            if (lesJoueurs.Count >= nbJoueurMax)
+            if (lesJoueurs.Count >= nbJoueurMax && !PartieDébuter)
             {
                 unJoueur.estAudience = true;
                 lesSpectateur.Add(unJoueur);
@@ -124,14 +128,21 @@ namespace ProjetJeuWSWeb3.Models
             return listeVotes.Count == nbVotes;
         }
 
-        public void voter(string alias, string data)
+        public void voter(string alias, string idJoeurVoterPour)
         {
-            listeVotes.Add(alias, data);
+            foreach (Joueur joueur in lesJoueurs) {
+                if (joueur.Nom == idJoeurVoterPour)
+                    joueur.pointage += pointParVote * tour;
+            }
+
+            listeVotes.Add(alias, idJoeurVoterPour);
         }
 
         internal Dictionary<string, int> ObtenirVote()
         {
+
             Dictionary<string, int> votes = new Dictionary<string, int>();
+
             foreach (KeyValuePair<string, string> phrase in listeVotes)
             {
                 if (!votes.ContainsKey(phrase.Value))
@@ -143,6 +154,7 @@ namespace ProjetJeuWSWeb3.Models
                 }
             }
 
+
             foreach (string réponse in listeRéponses.Values)
             {
                 if (!votes.ContainsKey(réponse))
@@ -150,7 +162,19 @@ namespace ProjetJeuWSWeb3.Models
                     votes.Add(réponse, 0);
                 }
             }
-            return votes;
+             
+            return classéDictionnaireVote(votes);
+            
+        }
+
+        private Dictionary<string, int> classéDictionnaireVote(Dictionary<string, int> votes)
+        {
+            Dictionary<string, int> voteClassé = new Dictionary<string, int>();
+            foreach (KeyValuePair<string, int> vote in votes.OrderBy(key => key.Value)) {
+                voteClassé.Add(vote.Key, vote.Value);
+            }
+
+            return voteClassé;
         }
     }
 }

@@ -9,6 +9,7 @@ namespace ProjetJeuWSWeb3.Models
     {
         public string Nom { get; set; }
         public bool estAudience { get; set; } = false;
-        public int pointage { get; set; }
+        public int pointage { get; set; } = 0;
+
     }
 }

@@ -23,6 +23,10 @@
     #zoneRésultat {
         display: none;
     }
+
+    #zoneDébut {
+        display: none;
+    }
 </style>
 <h2 id="idPartie">Lobby</h2>
 <div class="row" id="creerLobby" >
@@ -50,8 +54,7 @@
     <ul id="leaderboard"></ul>
 </div>
 <div class="row" id="zonePublic">
-    <input type="button" id="bleader" value="Afficher Leaderboard" />
-    <input type="button" id="bcacher" value="Cacher leaderboard" />
+   <h2>Nb de Spectateur</h2>
     <span id="nbSpectarteur"></span>
 </div>
 <script>
@@ -125,13 +128,13 @@
         webSocket.send(JSON.stringify(msg));
     }
 
-    document.getElementById('bleader').onclick = function () {
-        finirLeJeu();
+    function lancerAfficherLeaderboard() {
+        var msg = {
+            Categorie: "JEU", Type: "JEUXTERMINER"
+        }
+        webSocket.send(JSON.stringify(msg));
     }
 
-    document.getElementById('bcacher').onclick = function () {
-        document.getElementById('leaderboard').innerHTML = "";
-    }
 
     document.getElementById('bCreerLobby').onclick = function () {
         if (webSocket == null) {
@@ -143,6 +146,7 @@
                 document.getElementById('zoneDébut').style['display'] = "block";
             }
             webSocket.onclose = function (event) {
+                document.getElementById('zoneDébut').style['display'] = "none";
                 document.getElementById('zoneLeaderBoard').style['display'] = "none";
                 document.getElementById('creerLobby').style['display'] = "block";
             }
@@ -162,6 +166,8 @@
                         switch (msg.Type) {
                             case "NEXTROUND":
                                 var partie = msg.Data;
+                                document.getElementById('zonePhrase').style['display'] = 'none';
+                                document.getElementById('zoneVote').style['display'] = 'none';
                                 prochaineRonde(partie.phraseACompleter);
                                 break;
                             case "PHRASECOMPLETER":
@@ -169,13 +175,13 @@
                                 break;
                             case "AFFICHERVOTE":
                                 votes = msg.Data; zoneVote
+                                document.getElementById('zonePhrase').style['display'] = 'none';
                                 document.getElementById('zoneVote').style['display'] = 'none';
                                 document.getElementById('zoneResultat').style['display'] = 'block';
                                 for (var key in votes) {
                                     document.getElementById('votes').innerHTML += "<li class='votes'>" + key + ": "+ votes[key] + "</li>";
                                 }
-
-                                setTimeout(lancerProchaineRonde, 3000)
+                                setTimeout(lancerAfficherLeaderboard, 3000)
                                 break;
                             case "JOUEURVOTE":
                                 ajouterJoueurVote(msg.data);
@@ -195,6 +201,13 @@
                                     Categorie: "JEU", Type: "VOTECOMPLETER", Data: msg.Data
                                 }
                                 webSocket.send(JSON.stringify(msg));
+                                break;
+                            case "LEADERBORD":
+                                document.getElementById('zonePhrase').style['display'] = 'none';
+                                document.getElementById('zoneVote').style['display'] = 'none';
+                                document.getElementById('zoneResultat').style['display'] = 'block';
+                                afficherLeaderboard(msg.data);
+                                setTimeout(lancerProchaineRonde, 3000)
                                 break;
                         }
                         break;
