@@ -73,7 +73,7 @@ namespace ProjetJeuWSWeb3.WS
                                 if (jeu != null)
                                 {
                                     jeu.AjouterJoueur(message.Data.ToString());
-                                    if (jeu.vérifierSijoueurMaxAtteint())
+                                    if (jeu.vérifierSijoueurMaxAtteint() && jeu.VréifierPartieDébuter())
                                     {
                                         await EnvoyerA(new Message { Categorie = "CONNECTER", Type = "NOUVEAUSPECTATEUR", Data = message.Data.ToString() }, socket);
                                     }

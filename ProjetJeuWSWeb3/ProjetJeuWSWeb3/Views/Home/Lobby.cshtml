@@ -61,8 +61,7 @@
     <ul id="leaderboard"></ul>
 </div>
 <div class="row" id="zonePublic">
-    <p>Nb de Spectateur:</p>
-    <span id="nbSpectarteur"></span>
+    <p id="nbSpectarteur">Nb de Spectateur: 0</p>
 </div>
 
 <script>
@@ -82,7 +81,7 @@
     function ajouterSpectateur() {
         console.log("ok shawty");
         nbSpectateur += 1;
-        document.getElementById('nbSpectarteur').innerHTML = nbSpectateur;
+        document.getElementById('nbSpectarteur').innerHTML = "Nb de Spectateur: " + nbSpectateur;
     }
 
     function envoyerVote(nom) {

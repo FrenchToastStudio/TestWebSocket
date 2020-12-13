@@ -141,6 +141,7 @@
             document.getElementById('bsubmitPhrase').disabled = true;
             document.getElementById('zoneJeu').style['display'] = "none";
             var finalString = document.getElementById('phrase1').innerHTML + " " + document.getElementById('phrasefinale').value;
+            document.getElementById('phrasefinale').value = ""
             envoyerPhrase(finalString);
         }
 
@@ -170,6 +171,7 @@
 
         document.getElementById('bEnvoyer').onclick = function () {
             envoyerChat(document.getElementById('message').value);
+            document.getElementById('message').value = ""
         }
 
         document.getElementById('bFermer').onclick = function () {
