@@ -24,7 +24,7 @@ namespace ProjetJeuWSWeb3.Models
         private bool PartieDébuter = false;
 
         //régle du jeu
-        private int nbTourMax = 10;
+        private int nbTourMax = 2;
         private int pointParVote = 100;
         private int nbJoueurMax = 10;
 
@@ -43,7 +43,7 @@ namespace ProjetJeuWSWeb3.Models
 
         public bool VérifierPartieFini()
         {
-            return nbTourMax == tour;
+            return nbTourMax < tour;
         }
 
         public bool VréifierPartieDébuter() 
@@ -59,30 +59,25 @@ namespace ProjetJeuWSWeb3.Models
             }
         }
 
-        public Dictionary<string, int> ObtenirLeaderBoard()
+        public List<Joueur> ObtenirLeaderBoard()
         {
             Dictionary<string, int> leaderboard= new Dictionary<string, int>();
             for (int i = 0; i < lesJoueurs.Count - 1; i++) {
                 for (int j = 0; j > lesJoueurs.Count - 1; j++) 
                 {
                     if (lesJoueurs[j].pointage > lesJoueurs[j - 1].pointage) {
-                        Joueur temporaire = lesJoueurs[j - 1];
+                       Joueur temporaire = lesJoueurs[j - 1];
                        lesJoueurs[j - 1] = lesJoueurs[j];
-                        lesJoueurs[j] = temporaire;
+                       lesJoueurs[j] = temporaire;
                     }
                 }
             }
-            return leaderboard;
+            return lesJoueurs;
         }
 
         public void changerPointJoueur(int id,int point) 
         {
             lesJoueurs[id].pointage = point;
-        }
-
-        public List<Joueur> formatterLeaderBoard() 
-        {
-            return lesJoueurs;
         }
 
         internal bool vérifierSijoueurMaxAtteint()
@@ -92,7 +87,6 @@ namespace ProjetJeuWSWeb3.Models
 
         public void ProchainTour()
         {
-            formatterLeaderBoard();
             PartieDébuter = true;
             phraseACompleter = PhrasesProvider.getRandomPhrase();
             listeRéponses = new Dictionary<string, string>();
@@ -143,14 +137,15 @@ namespace ProjetJeuWSWeb3.Models
 
             Dictionary<string, int> votes = new Dictionary<string, int>();
 
-            foreach (KeyValuePair<string, string> phrase in listeVotes)
+            foreach (KeyValuePair<string, string> vote in listeVotes)
             {
-                if (!votes.ContainsKey(phrase.Value))
+
+                if (!votes.ContainsKey(listeRéponses[vote.Value]))
                 {
-                    votes.Add(phrase.Value, 1);
+                    votes.Add(listeRéponses[vote.Value], 1);
                 }
                 else {
-                    votes[phrase.Value] += 1;
+                    votes[listeRéponses[vote.Value]] += 1;
                 }
             }
 

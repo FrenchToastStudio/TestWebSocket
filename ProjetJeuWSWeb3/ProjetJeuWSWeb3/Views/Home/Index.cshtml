@@ -240,66 +240,64 @@
             webSocket.onmessage = function (event) {
                 var msg = JSON.parse(event.data);
 
-                console.log(msg.Categorie);
-                console.log(msg.Type);
-                console.log(msg.Data);
-                switch (msg.Categorie) {
-                    case "CONNECTE":
-                        switch (msg.Type) {
-                            case "PREMIERJOUEUR":
-                                document.getElementById('bsubmitDemmarerPartie').style['display'] = "block";
-                                break;
-                            case "ADD":
-                                ajouterConnecte(msg.Data);
-                                break;
-                            case "DEL":
-                                enleverConnecte(msg.Data);
-                                break;
-                            case "LIST":
-                                document.getElementById('connectes').innerHTML = '';
-                                msg.Data.forEach((e) => { if (e != alias) ajouterConnecte(e); });
-                                break;
-                            case "PARTIE":
-                                break;
-                        }
-                        break;
-                    case "CONNECTER":
-                        switch (msg.Type) {
-                            case "NOUVEAUSPECTATEUR":
-                                afficherPublic();
-                                break;
-                        }
-                        break;
-                    case "MESSAGE":
-                        document.getElementById('zoneChat').innerHTML += msg.Data + "<br />";
-                    case "JEU":
-                        switch (msg.Type) {
-                            case "START":
-                                console.log(msg.Data);
-                                var partie = msg.Data;
-                                partieTerminee = false;
-                                cacherTouteZone();
-                                document.getElementById('bsubmitPhrase').disabled = false;
-                                document.getElementById('zoneJeu').style['display'] = "block";
-                                document.getElementById('phrase1').innerHTML = partie.phraseACompleter;
-                                break;
-                            case "ABANDON":
-                                break;
-                            case "JEUXTERMINER":
-                                break;
-                            case "GAME":
-                                break;
-
-                            case "NEXTROUND":
-                                prochaineRonde(msg.Data)
-                                break;
-                            case "PHASEVOTE":
-                                var phrases = msg.Data;
-                                for (var key in phrases) {
-                                    if (key != alias) {
-                                        document.getElementById('votes').innerHTML += "<li class='membre' id='vt_" + key + "'>" + phrases[key] + "</li>";
-                                        console.log("before: " + phrases[key]);
-                                        setOnClick(key);
+                    console.log(msg.Categorie);
+                    console.log(msg.Type);
+                    console.log(msg.Data);
+                    switch (msg.Categorie) {
+                        case "CONNECTE":
+                            switch (msg.Type) {
+                                case "PREMIERJOUEUR":
+                                    document.getElementById('bsubmitDemmarerPartie').style['display'] = "block";
+                                    break;
+                                case "ADD":
+                                    ajouterConnecte(msg.Data);
+                                    break;
+                                case "DEL":
+                                    enleverConnecte(msg.Data);
+                                    break;
+                                case "LIST":
+                                    document.getElementById('connectes').innerHTML = '';
+                                    msg.Data.forEach((e) => { if (e != alias) ajouterConnecte(e); });
+                                    break;
+                                case "PARTIE":
+                                    break;
+                            }
+                            break;
+                        case "CONNECTER":
+                            switch (msg.Type) {
+                                case "NOUVEAUSPECTATEUR":
+                                    afficherPublic();
+                                    break;
+                            }
+                            break;
+                        case "MESSAGE":
+                            document.getElementById('zoneChat').innerHTML += msg.Data + "<br />";
+                        case "JEU":
+                            switch (msg.Type) {
+                                case "START":
+                                    console.log(msg.Data);
+                                    var partie = msg.Data;
+                                    partieTerminee = false;
+                                    cacherTouteZone();
+                                    document.getElementById('bsubmitPhrase').disabled = false;
+                                    document.getElementById('zoneJeu').style['display'] = "block";
+                                    document.getElementById('phrase1').innerHTML = partie.phraseACompleter;
+                                    break;
+                                case "ABANDON":
+                                    break;
+                                case "GAME":
+                                    break;
+                                case "NEXTROUND":
+                                    prochaineRonde(msg.Data)
+                                    break;
+                                case "PHASEVOTE":
+                                    var phrases = msg.Data;
+                                    for (var key in phrases) {
+                                        if (key != alias) {
+                                            document.getElementById('votes').innerHTML += "<li class='membre' id='vt_" + key + "'>" + phrases[key] + "</li>";
+                                            console.log("before: " + phrases[key]);
+                                            setOnClick(key);
+                                        }
                                     }
                                 }
                                 document.getElementById('zoneVote').style['display'] = "block";
