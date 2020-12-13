@@ -16,6 +16,7 @@ namespace ProjetJeuWSWeb3.WS
     {
         private Message message = new Message();
         string idPartie;
+        string aliasHotePartie;
         JeuPhraseACompleter jeu;
 
         public GestionnaireWebSocketsLobby() : base(2048)
@@ -78,6 +79,7 @@ namespace ProjetJeuWSWeb3.WS
                                     }
                                     else if (jeu.lesJoueurs.Count == 1) 
                                     {
+                                        aliasHotePartie = message.Data.ToString();
                                         await EnvoyerA(new Message { Categorie = "CONNECTER", Type = "NOUVEAUJOUEUR", Data = message.Data.ToString() }, socket);
                                         await EnvoyerA(new Message { Categorie = "CONNECTE", Type = "PREMIERJOUEUR", Data = message.Data.ToString() }, message.Data.ToString());
                                     }
@@ -148,10 +150,6 @@ namespace ProjetJeuWSWeb3.WS
                                             foreach (Joueur joueur in jeu.lesJoueurs)
                                             {
                                                 await EnvoyerA(new Message { Categorie = "JEU", Type = "AFFICHERVOTE", Data = jeu.ObtenirVote() }, joueur.Nom);
-                                            }
-                                            foreach (Joueur joueur in jeu.lesSpectateur) 
-                                            {
-                                                await EnvoyerA(new Message { Categorie = "PUBLIC", Type = "SCORE", Data = jeu.ObtenirVote() }, joueur.Nom);
                                             }
                                             jeu.ProchainTour();
                                         }
