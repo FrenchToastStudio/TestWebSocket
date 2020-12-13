@@ -1,300 +1,345 @@
 ﻿<style>
     #main {
         display: none;
+        margin:auto;
     }
 
     #zoneJeu {
         display: none;
     }
+
     #zoneVote {
         display: none;
     }
+
     #zonePublic {
-        display:none;
+        display: none;
     }
+
     #bsubmitDemmarerPartie {
         display: none;
     }
+
+    .tab-pane {
+        height: 300px;
+        overflow-y: scroll;
+        width: 100%;
+    }
+
+    #bEnvoyer{
+        margin-left: 10px;
+    }
 </style>
-<div class="jumbotron">
-    <h1>WebSockets dans ASP.NET MVC</h1>
+<div class="jumbotron container-fluid">
+    <h1 class="text-center">Fun Zone</h1>
 </div>
 <div class="row" id="login">
     <div class="col-md-8">
         <h2>Saisissez votre alias :</h2>
-        <input type="text" id="alias" />
+        <input type="text" id="alias" class="form-control" />
         <div id="reponse1"></div>
-        <input type="button" id="bConnecter" value="Se connecter" />
-    </div>
-    <div class="col-md-4">
-
+        <br>
+        <input type="button" id="bConnecter" value="Se connecter" class="btn btn-primary" />
     </div>
 </div>
 <div class="row" id="main">
-    <div class="col-md-3">
-        <span id="sAlias"></span>
-        <input type="button" id="bFermer" value="Se déconnecter" />
-        <h2>Code de la partie:</h2>
-        <input type="text" id="numeroLobby" />
-        <input type="button" id="bConnecterLobby" value="Joindre salle de jeux" />
+    <!--ROW USERNAME-->
+    <div class="row">
+        <div class="col-md-3">
+            <h4>
+                <span class="glyphicon glyphicon-user"></span>
+                <span id="sAlias"></span>
+            </h4>
+            <input type="button" id="bFermer" value="Se déconnecter" class="btn btn-warning btn-xs" />
+        </div>
+    </div>
+    <!--ROW EVERYTHING-->
+    <div class="col-sm-4">
         <h3>Connectés</h3>
-        <ol id="connectes">
-        </ol>
+        <ol id="connectes"></ol>
+    </div>
+    <div class="col-sm-4">
+        <h2>Code de la partie:</h2>
+        <input type="text" id="numeroLobby" class="form-control"/>
+        <br><br>
+        <input type="button" id="bConnecterLobby" value="Joindre salle de jeux" class="btn btn-success" />
     </div>
     <div class="col-md-4">
-        <h2>Zone de chat :</h2>
-        <div id="zoneChat"></div>
-    </div>
-    <div class="col-md-8">
-        <h2>Saisissez votre message :</h2>
-        <input type="text" id="message" />
-        <input type="button" id="bEnvoyer" value="Envoyer" />
-
-        <div id="reponse"></div>
+        <div class="row">
+            <div class="col-md-4">
+                <h1>Chat</h1>
+                <div class="input-group">
+                    <input type="text" id="message" class="form-control"/>
+                    <span class="input-group-btn">
+                    <input type="button" id="bEnvoyer" value="Envoyer" class="btn btn-primary" />
+                    </span>
+                    <div id="reponse"></div>
+                </div>
+            </div>
+            <div class="panel panel-default tab-pane" id="chatBox" >
+                <div class=panel-heading>
+                    <h2 class="panel-title">Zone de chat :</h2>
+                </div>
+                <div class="panel-body">
+                    <div id="zoneChat"></div>
+                </div>
+            </div>
+        </div>
     </div>
     <div class="col-md-12" id="zoneAttente">
         <input type="button" id="bsubmitDemmarerPartie" value="CommencerPartie" />
     </div>
 </div>
-    <div class="col-md-12" id="zoneJeu">
-        <h3>Créer la meilleure phrase possible!!!</h3>
-        <div id="phrase">
-            <h1 id="phrase1"></h1><br />
-            <input type="text" id="phrasefinale" />
-            <input type="button" id="bsubmitPhrase" value="Envoyer Phrase" />
-        </div>
+<div class="col-md-12" id="zoneJeu">
+    <h3>Créer la meilleure phrase possible!!!</h3>
+    <div id="phrase">
+        <h1 id="phrase1"></h1><br />
+        <input type="text" id="phrasefinale" class="form-control"/>
+        <input type="button" id="bsubmitPhrase" value="Envoyer Phrase" />
     </div>
-    <div class="col-md-12" id="zonePublic">
-        <h3>Zone Public</h3>
-        <div id="score"></div>
-    </div>
-    <div class="col-md-12" id="zoneVote">
-        <ul id="votes"></ul>
-    </div>
-    <script>
-        function ajouterConnecte(nom) {
-            document.getElementById('connectes').innerHTML += "<li class='membre' id='" + nom + "'>" + nom + "</li>";
-        }
-        function enleverConnecte(nom) {
-            document.getElementById(nom).style['display'] = 'none';
-        }
+</div>
+<div class="col-md-12" id="zonePublic">
+    <h3>Zone Public</h3>
+    <div id="score"></div>
+</div>
+<div class="col-md-12" id="zoneVote">
+    <ul id="votes"></ul>
+</div>
+<script>
+    function ajouterConnecte(nom) {
+        document.getElementById('connectes').innerHTML += "<li class='membre' id='" + nom + "'>" + nom + "</li>";
+    }
+    function enleverConnecte(nom) {
+        document.getElementById(nom).style['display'] = 'none';
+    }
 
-        function envoyerChat(contenu) {
-            var msg = {
-                Categorie: "MESSAGE", Type: "CHAT", Data: contenu
-            };
-            if (webSocket != null) {
-                webSocket.send(JSON.stringify(msg));
-            }
-        }
-
-        function afficherPublic()
-        {
-            document.getElementById('zonePublic').style['display'] = 'block';
-        }
-
-        function prochaineRonde(phraseACompleter) {
-            document.getElementById('zoneJeu').style['display'] = "block";
-            document.getElementById('bsubmitPhrase').disabled = false;
-            document.getElementById("phrasefinale").innerHTML = phraseACompleter;
-        }
-
-        function attente() {
-            document.getElementById('zoneJeu').style['display'] = "none";
-        }
-
-        function cacherTouteZone() {
-            document.getElementById('zoneJeu').style['display'] = "none";
-            document.getElementById('main').style['display'] = "none";
-        }
-
-        function envoyerPhrase(contenu) {
-            document.getElementById('zoneJeu').style['display'] = "none";
-            console.log(contenu)
-            var msg = {
-                Categorie: "JEU", Type: "GAME", Data: contenu
-            }
-            if (webSocket != null) {
-                webSocket.send(JSON.stringify(msg));
-            }
-        }
-
-        function voterPourPhrase(id) {
-            document.getElementById('zoneVote').style['display'] = "none";
-
-            var msg = {
-                Categorie: "JEU", Type: "VOTE", Data: id
-            }
-            if (webSocket != null) {
-                webSocket.send(JSON.stringify(msg));
-            }
-
-        }
-        function setOnClick(id) {
-            document.getElementById('vt_' + id).onclick = function () {
-                voterPourPhrase(id);
-                console.log("click: " + cle);
-            };
-        }
-
-        document.getElementById('bsubmitPhrase').onclick = function () {
-            document.getElementById('bsubmitPhrase').disabled = true;
-            document.getElementById('zoneJeu').style['display'] = "none";
-            var finalString = document.getElementById('phrase1').innerHTML + " " + document.getElementById('phrasefinale').value;
-            envoyerPhrase(finalString);
-        }
-
-        
-
-        document.getElementById('bConnecterLobby').onclick = function () {
-            document.getElementById('bConnecterLobby').disabled = true;
-            
-            var msg = {
-                Categorie: "CONNECTE", Type: "PARTIE", Data: document.getElementById('numeroLobby').value
-            }
-            if (webSocket != null) {
-                console.log(document.getElementById('numeroLobby').value);
-                webSocket.send(JSON.stringify(msg));
-            }
-        }
-
-        document.getElementById('bsubmitDemmarerPartie').onclick = function () {
-            document.getElementById('bsubmitPhrase').disabled = true;
-            var msg = {
-                Categorie: "JEU", Type: "DEMARRER", Data: ""
-            }
-            if (webSocket != null) {
-                webSocket.send(JSON.stringify(msg));
-            }
-        }
-
-        document.getElementById('bEnvoyer').onclick = function () {
-            envoyerChat(document.getElementById('message').value);
-        }
-
-        document.getElementById('bFermer').onclick = function () {
-            if (webSocket != null) {
-                webSocket.close(1000, JSON.stringify({ Categorie: "CONNECTE", Type: "QUIT", Data: alias }));
-                webSocket = null;
-            }
-        }
-
-        /////////////////////////
-        var webSocket = null;
-        var alias = null;
-        var partieTerminee = false;
-        var message = { Categorie: null, Type: null, Data: null };
-        document.getElementById('bConnecter').onclick = function () {
-            if (webSocket == null) {
-                alias = document.getElementById('alias').value;
-                var URL = "ws://localhost:57339/api/websocket/" + alias;
-                webSocket = new WebSocket(URL);
-                webSocket.onopen = function () {
-                    document.getElementById('login').style['display'] = "none";
-                    document.getElementById('main').style['display'] = "block";
-                    document.getElementById('sAlias').innerHTML = alias;
-                }
-                webSocket.onclose = function (event) {
-                    document.getElementById('login').style['display'] = "block";
-                    document.getElementById('main').style['display'] = "none";
-                }
-                webSocket.onerror = function (event) {
-                }
-
-                webSocket.onmessage = function (event) {
-                    var msg = JSON.parse(event.data);
-
-                    console.log(msg.Categorie);
-                    console.log(msg.Type);
-                    console.log(msg.Data);
-                    switch (msg.Categorie) {
-                        case "CONNECTE":
-                            switch (msg.Type) {
-                                case "PREMIERJOUEUR":
-                                    document.getElementById('bsubmitDemmarerPartie').style['display'] = "block";
-                                    break;
-                                case "ADD":
-                                    ajouterConnecte(msg.Data);
-                                    break;
-                                case "DEL":
-                                    enleverConnecte(msg.Data);
-                                    break;
-                                case "LIST":
-                                    document.getElementById('connectes').innerHTML = '';
-                                    msg.Data.forEach((e) => { if (e != alias) ajouterConnecte(e); });
-                                    break;
-                                case "PARTIE":
-                                    break;
-                            }
-                            break;
-                        case "CONNECTER":
-                            switch (msg.Type) {
-                                case "NOUVEAUSPECTATEUR":
-                                    afficherPublic();
-                                    break;
-                            }
-                            break;
-                        case "MESSAGE":
-                            document.getElementById('zoneChat').innerHTML += msg.Data + "<br />";
-                        case "JEU":
-                            switch (msg.Type) {
-                                case "START":
-                                    console.log(msg.Data);
-                                    var partie = msg.Data;
-                                    partieTerminee = false;
-                                    cacherTouteZone();
-                                    document.getElementById('bsubmitPhrase').disabled = false;
-                                    document.getElementById('zoneJeu').style['display'] = "block";
-                                    document.getElementById('phrase1').innerHTML = partie.phraseACompleter;
-                                    break;
-                                case "ABANDON":
-                                    break;
-                                case "JEUXTERMINER":
-                                    break;
-                                case "GAME":
-                                    break;
-
-                                case "NEXTROUND":
-                                    prochaineRonde(msg.Data)
-                                    break;
-                                case "PHASEVOTE":
-                                    var phrases = msg.Data;
-                                    for (var key in phrases) {
-                                        if (key != alias) {
-                                            document.getElementById('votes').innerHTML += "<li class='membre' id='vt_" + key + "'>" + phrases[key] + "</li>";
-                                            console.log("before: " + phrases[key]);
-                                            setOnClick(key);
-                                        }
-                                    }
-                                    document.getElementById('zoneVote').style['display'] = "block";
-                                    break;
-                            }
-                            break;
-                        case "PUBLIC":
-                            switch (msg.Type)
-                            {
-                                case "START":
-                                    afficherPublic();
-                                    break;
-                                case "PHASEVOTE":
-                                    var phrases = msg.Data;
-                                    document.getElementById('votes').innerHTML = "";
-                                    for(var key in phrases) {
-                                        if (key != alias) {
-                                            document.getElementById('votes').innerHTML += "<li class='membre' id='vt_" + key + "'>" + phrases[key] + "</li>";
-                                            console.log("before: " + phrases[key]);
-                                            setOnClick(key, phrases[key]);
-                                        }
-                                    }
-                                    document.getElementById('zoneVote').style['display'] = "block";
-                                    break;
-                                case "SCORE":
-                                    console.log("stats recus");
-                                    break;
-                            }
-                            break;
-                    }
-                }
-            }
+    function envoyerChat(contenu) {
+        var msg = {
+            Categorie: "MESSAGE", Type: "CHAT", Data: contenu
         };
-    </script>
+        if (webSocket != null) {
+            webSocket.send(JSON.stringify(msg));
+        }
+    }
+
+    function afficherPublic() {
+        document.getElementById('zonePublic').style['display'] = 'block';
+    }
+
+    function prochaineRonde(phraseACompleter) {
+        document.getElementById('zoneJeu').style['display'] = "block";
+        document.getElementById('bsubmitPhrase').disabled = false;
+        document.getElementById("phrasefinale").innerHTML = phraseACompleter;
+    }
+
+    function attente() {
+        document.getElementById('zoneJeu').style['display'] = "none";
+    }
+
+    function cacherTouteZone() {
+        document.getElementById('zoneJeu').style['display'] = "none";
+        document.getElementById('main').style['display'] = "none";
+    }
+
+    function envoyerPhrase(contenu) {
+        document.getElementById('zoneJeu').style['display'] = "none";
+        console.log(contenu)
+        var msg = {
+            Categorie: "JEU", Type: "GAME", Data: contenu
+        }
+        if (webSocket != null) {
+            webSocket.send(JSON.stringify(msg));
+        }
+    }
+
+    function voterPourPhrase(id) {
+        document.getElementById('zoneVote').style['display'] = "none";
+
+        var msg = {
+            Categorie: "JEU", Type: "VOTE", Data: id
+        }
+        if (webSocket != null) {
+            webSocket.send(JSON.stringify(msg));
+        }
+
+    }
+    function setOnClick(id) {
+        document.getElementById('vt_' + id).onclick = function () {
+            voterPourPhrase(id);
+            console.log("click: " + cle);
+        };
+    }
+
+    document.getElementById('bsubmitPhrase').onclick = function () {
+        document.getElementById('bsubmitPhrase').disabled = true;
+        document.getElementById('zoneJeu').style['display'] = "none";
+        var finalString = document.getElementById('phrase1').innerHTML + " " + document.getElementById('phrasefinale').value;
+        envoyerPhrase(finalString);
+    }
+
+
+
+    document.getElementById('bConnecterLobby').onclick = function () {
+        document.getElementById('bConnecterLobby').disabled = true;
+
+        var msg = {
+            Categorie: "CONNECTE", Type: "PARTIE", Data: document.getElementById('numeroLobby').value
+        }
+        if (webSocket != null) {
+            console.log(document.getElementById('numeroLobby').value);
+            webSocket.send(JSON.stringify(msg));
+        }
+    }
+
+    document.getElementById('bsubmitDemmarerPartie').onclick = function () {
+        document.getElementById('bsubmitPhrase').disabled = true;
+        var msg = {
+            Categorie: "JEU", Type: "DEMARRER", Data: ""
+        }
+        if (webSocket != null) {
+            webSocket.send(JSON.stringify(msg));
+        }
+    }
+
+    document.getElementById('bEnvoyer').onclick = function () {
+        envoyerChat(document.getElementById('message').value);
+        var objDiv = document.getElementById('chatBox');
+        objDiv.scrollTop = objDiv.scrollHeight;
+    }
+
+    document.getElementById('bFermer').onclick = function () {
+        if (webSocket != null) {
+            webSocket.close(1000, JSON.stringify({ Categorie: "CONNECTE", Type: "QUIT", Data: alias }));
+            webSocket = null;
+        }
+    }
+
+    /////////////////////////
+    var webSocket = null;
+    var alias = null;
+    var partieTerminee = false;
+    var message = { Categorie: null, Type: null, Data: null };
+
+    function socketManager() {
+        if (webSocket == null) {
+            alias = document.getElementById('alias').value;
+            var URL = "ws://localhost:57339/api/websocket/" + alias;
+            webSocket = new WebSocket(URL);
+            webSocket.onopen = function () {
+                document.getElementById('login').style['display'] = "none";
+                document.getElementById('main').style['display'] = "block";
+                document.getElementById('sAlias').innerHTML = alias;
+            }
+            webSocket.onclose = function (event) {
+                document.getElementById('login').style['display'] = "block";
+                document.getElementById('main').style['display'] = "none";
+            }
+            webSocket.onerror = function (event) {
+            }
+
+            webSocket.onmessage = function (event) {
+                var msg = JSON.parse(event.data);
+
+                console.log(msg.Categorie);
+                console.log(msg.Type);
+                console.log(msg.Data);
+                switch (msg.Categorie) {
+                    case "CONNECTE":
+                        switch (msg.Type) {
+                            case "PREMIERJOUEUR":
+                                document.getElementById('bsubmitDemmarerPartie').style['display'] = "block";
+                                break;
+                            case "ADD":
+                                ajouterConnecte(msg.Data);
+                                break;
+                            case "DEL":
+                                enleverConnecte(msg.Data);
+                                break;
+                            case "LIST":
+                                document.getElementById('connectes').innerHTML = '';
+                                msg.Data.forEach((e) => { if (e != alias) ajouterConnecte(e); });
+                                break;
+                            case "PARTIE":
+                                break;
+                        }
+                        break;
+                    case "CONNECTER":
+                        switch (msg.Type) {
+                            case "NOUVEAUSPECTATEUR":
+                                afficherPublic();
+                                break;
+                        }
+                        break;
+                    case "MESSAGE":
+                        document.getElementById('zoneChat').innerHTML += msg.Data + "<br />";
+                    case "JEU":
+                        switch (msg.Type) {
+                            case "START":
+                                console.log(msg.Data);
+                                var partie = msg.Data;
+                                partieTerminee = false;
+                                cacherTouteZone();
+                                document.getElementById('bsubmitPhrase').disabled = false;
+                                document.getElementById('zoneJeu').style['display'] = "block";
+                                document.getElementById('phrase1').innerHTML = partie.phraseACompleter;
+                                break;
+                            case "ABANDON":
+                                break;
+                            case "JEUXTERMINER":
+                                break;
+                            case "GAME":
+                                break;
+
+                            case "NEXTROUND":
+                                prochaineRonde(msg.Data)
+                                break;
+                            case "PHASEVOTE":
+                                var phrases = msg.Data;
+                                for (var key in phrases) {
+                                    if (key != alias) {
+                                        document.getElementById('votes').innerHTML += "<li class='membre' id='vt_" + key + "'>" + phrases[key] + "</li>";
+                                        console.log("before: " + phrases[key]);
+                                        setOnClick(key);
+                                    }
+                                }
+                                document.getElementById('zoneVote').style['display'] = "block";
+                                break;
+                        }
+                        break;
+                    case "PUBLIC":
+                        switch (msg.Type) {
+                            case "START":
+                                afficherPublic();
+                                break;
+                            case "PHASEVOTE":
+                                var phrases = msg.Data;
+                                document.getElementById('votes').innerHTML = "";
+                                for (var key in phrases) {
+                                    if (key != alias) {
+                                        document.getElementById('votes').innerHTML += "<li class='membre' id='vt_" + key + "'>" + phrases[key] + "</li>";
+                                        console.log("before: " + phrases[key]);
+                                        setOnClick(key, phrases[key]);
+                                    }
+                                }
+                                document.getElementById('zoneVote').style['display'] = "block";
+                                break;
+                            case "SCORE":
+                                console.log("stats recus");
+                                break;
+                        }
+                        break;
+                }
+            }
+        }
+    }
+
+    document.getElementById('bConnecter').onclick = function () {
+        socketManager();
+    };
+
+    document.getElementById('bConnecter').onkeydown = function (e) {
+        if (e.keyCode == 13) {
+            socketManager();
+        }
+    };
+</script>
