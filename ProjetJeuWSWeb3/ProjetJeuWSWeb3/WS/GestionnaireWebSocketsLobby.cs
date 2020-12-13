@@ -99,19 +99,29 @@ namespace ProjetJeuWSWeb3.WS
                                 if (jeu != null)
                                 {
                                     jeu.ProchainTour();
-                                    foreach (Joueur joueur in jeu.lesJoueurs)
-                                    {
-                                        await EnvoyerA(new Message { Categorie = "JEU", Type = "START", Data = jeu }, joueur.Nom);
+                                    if (jeu.VérifierPartieFini()) {
+                                        await EnvoyerA(new Message { Categorie = "JEU", Type = "PARTIETERMINER", Data = jeu.ObtenirVote() }, socket);
+                                        foreach (Joueur joueur in jeu.lesJoueurs)
+                                        {
+                                            await EnvoyerA(new Message { Categorie = "JEU", Type = "PARTIETERMINER", Data = jeu.ObtenirVote() }, joueur.Nom);
+                                        }
+                                    } else {
+                                        foreach (Joueur joueur in jeu.lesJoueurs)
+                                        {
+                                            await EnvoyerA(new Message { Categorie = "JEU", Type = "START", Data = jeu }, joueur.Nom);
 
+                                        }
+                                        foreach (Joueur foule in jeu.lesSpectateur)
+                                        {
+                                            await EnvoyerA(new Message { Categorie = "PUBLIC", Type = "START", Data = jeu }, foule.Nom);
+                                        }
+                                        await EnvoyerA(new Message { Categorie = "JEU", Type = "NEXTROUND", Data = jeu }, socket);
                                     }
-                                    foreach (Joueur foule in jeu.lesSpectateur) 
-                                    {
-                                        await EnvoyerA(new Message { Categorie = "PUBLIC", Type = "START", Data = jeu },foule.Nom);
-                                    }
-                                    await EnvoyerA(new Message { Categorie = "JEU", Type = "NEXTROUND", Data = jeu }, socket);
                                 }
                                 break;
-
+                                /**
+                                 * Véérifie si tout les joueur on completer leur phrases et 
+                                 */
                             case "PHRASECOMPLETER":
                                 jeu = ServeurLobbyJeu.GetPartieDe(this.idPartie);
                                 if (jeu != null)
@@ -130,6 +140,9 @@ namespace ProjetJeuWSWeb3.WS
                                     }
                                 }
                                 break;
+                                /**
+                                 * Vérifie a chaque fois qu'un joueur complete son vote  
+                                 */
                             case "VOTECOMPLETER":
                                 jeu = ServeurLobbyJeu.GetPartieDe(this.idPartie);
                                 if (jeu != null)
@@ -137,25 +150,17 @@ namespace ProjetJeuWSWeb3.WS
                                     
                                     if (jeu.VérifierToutVote())
                                     {
-                                        if (jeu.VérifierPartieFini())
+                                        await EnvoyerA(new Message { Categorie = "JEU", Type = "AFFICHERVOTE", Data = jeu.ObtenirVote() }, socket);
+                                        foreach (Joueur joueur in jeu.lesJoueurs)
                                         {
-                                            await EnvoyerA(new Message { Categorie = "JEU", Type = "PARTIETERMINER", Data = jeu.ObtenirVote() }, socket);
-                                            foreach (Joueur joueur in jeu.lesJoueurs)
-                                            {
-                                                await EnvoyerA(new Message { Categorie = "JEU", Type = "PARTIETERMINER", Data = jeu.ObtenirVote() }, joueur.Nom);
-                                            }
-                                        }
-                                        else {
-                                            await EnvoyerA(new Message { Categorie = "JEU", Type = "AFFICHERVOTE", Data = jeu.ObtenirVote() }, socket);
-                                            foreach (Joueur joueur in jeu.lesJoueurs)
-                                            {
-                                                await EnvoyerA(new Message { Categorie = "JEU", Type = "AFFICHERVOTE", Data = jeu.ObtenirVote() }, joueur.Nom);
-                                            }
-                                            jeu.ProchainTour();
+                                            await EnvoyerA(new Message { Categorie = "JEU", Type = "AFFICHERVOTE", Data = jeu.ObtenirVote() }, joueur.Nom);
                                         }
                                     }
                                 }
                                 break;
+                                /**
+                                 * Dans le cas ou les joueur manque de temps pour finir leur phrase. complete leur prhrase et lance la fin de tour
+                                 */
                             case "TIMERUNOUT":
                                  jeu = ServeurLobbyJeu.GetPartieDe(this.idPartie);
                                 if (jeu != null)
@@ -164,13 +169,26 @@ namespace ProjetJeuWSWeb3.WS
                                     await EnvoyerA(new Message { Categorie = "JEU", Type = "TOURTERMINER", Data = jeu }, socket);
                                 }
                                 break;
+                                /**
+                                 *  Lance la fin du tour et envoie les leaderboard
+                                 */
+                            case "TOURTERMINER":
+                                jeu = ServeurLobbyJeu.GetPartieDe(this.idPartie);
+                                if (jeu != null)
+                                {
+                                    await EnvoyerA(new Message { Categorie = "JEU", Type = "LEADERBOARD", Data = jeu.ObtenirLeaderBoard() }, socket);
+                                }
+                                break;
+                                /**
+                                 * Termine la partie dans le cas ou elle est teminer
+                                 */
                             case "JEUXTERMINER":
                                 jeu = ServeurLobbyJeu.GetPartieDe(this.idPartie);
                                 if (jeu != null) {
-                                    await EnvoyerA(new Message { Categorie = "JEU", Type = "JEUXTERMINER", Data = jeu.formatterLeaderBoard() }, socket);
+                                    await EnvoyerA(new Message { Categorie = "JEU", Type = "JEUXTERMINER", Data = jeu.ObtenirLeaderBoard() }, socket);
                                     foreach (Joueur joueur in jeu.lesJoueurs)
                                     {
-                                        await EnvoyerA(new Message { Categorie = "JEU", Type = "JEUXTERMINER", Data = jeu.formatterLeaderBoard() }, joueur.Nom);
+                                        await EnvoyerA(new Message { Categorie = "JEU", Type = "JEUXTERMINER", Data = jeu.ObtenirLeaderBoard() }, joueur.Nom);
                                     }
                                 }
                                     break;

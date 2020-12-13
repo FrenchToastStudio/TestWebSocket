@@ -27,6 +27,10 @@
     #zoneDébut {
         display: none;
     }
+
+    #zoneFinPartie {
+        display: none;
+    }
 </style>
 <h2 id="idPartie">Lobby</h2>
 <div class="row" id="creerLobby" >
@@ -50,13 +54,17 @@
 <div class="row" id="zoneResultat">
     <ul id="votes"></ul>
 </div>
+<div class="row" id="zoneFinPartie">
+    <h2>Merci d'Avoir joué!</h2>
+</div>
 <div class="row" id="zoneLeaderBoard">
     <ul id="leaderboard"></ul>
 </div>
 <div class="row" id="zonePublic">
-   <h2>Nb de Spectateur</h2>
+    <p>Nb de Spectateur:</p>
     <span id="nbSpectarteur"></span>
 </div>
+
 <script>
     var webSocket = null;
     var idPartie = null;
@@ -82,10 +90,10 @@
     }
 
     function afficherLeaderboard(leaderboard) {
+
         console.log(leaderboard);
-        var leaderBoard = leaderboard;
         document.getElementById('zoneLeaderBoard').style['display'] = "block";
-        leaderBoard.forEach(element => document.getElementById('leaderboard').innerHTML += "<li class='participant' id='" + element.Nom + "'>" + element.Nom  + " : " + element.pointage + "</li>");
+        leaderboard.forEach(element => document.getElementById('leaderboard').innerHTML += "<li class='participant' id='" + element.Nom + "'>" + element.Nom  + " : " + element.pointage + "</li>");
     }
 
     function prochaineRonde(phrase) {
@@ -121,16 +129,10 @@
         webSocket.send(JSON.stringify(msg));
     }
 
-    function finirLeJeu() {
-        var msg = {
-            Categorie: "JEU", Type: "JEUXTERMINER"
-        }
-        webSocket.send(JSON.stringify(msg));
-    }
-
     function lancerAfficherLeaderboard() {
+        console.log("YOOO");
         var msg = {
-            Categorie: "JEU", Type: "JEUXTERMINER"
+            Categorie: "JEU", Type: "TOURTERMINER"
         }
         webSocket.send(JSON.stringify(msg));
     }
@@ -168,6 +170,7 @@
                                 var partie = msg.Data;
                                 document.getElementById('zonePhrase').style['display'] = 'none';
                                 document.getElementById('zoneVote').style['display'] = 'none';
+                                document.getElementById('zoneLeaderBoard').style['display'] = 'none';
                                 prochaineRonde(partie.phraseACompleter);
                                 break;
                             case "PHRASECOMPLETER":
@@ -186,9 +189,6 @@
                             case "JOUEURVOTE":
                                 ajouterJoueurVote(msg.data);
                                 break;
-                            case "JEUXTERMINER":
-                                afficherLeaderboard(msg.Data);
-                                break;
                             case "DEBUTER":
                                 console.log("Let the game begin");
                                 commencerPartie();
@@ -202,12 +202,15 @@
                                 }
                                 webSocket.send(JSON.stringify(msg));
                                 break;
-                            case "LEADERBORD":
+                            case "LEADERBOARD":
                                 document.getElementById('zonePhrase').style['display'] = 'none';
                                 document.getElementById('zoneVote').style['display'] = 'none';
-                                document.getElementById('zoneResultat').style['display'] = 'block';
-                                afficherLeaderboard(msg.data);
+                                document.getElementById('zoneResultat').style['display'] = 'none';
+                                document.getElementById('zoneLeaderBoard').style['display'] = 'block';
+                                afficherLeaderboard(msg.Data);
                                 setTimeout(lancerProchaineRonde, 3000)
+                                break;
+                            case "PARTIETERMINER":
                                 break;
                         }
                         break;

@@ -148,7 +148,7 @@ namespace ProjetJeuWSWeb3.WS
                                 if (partieEnCours != null)
                                 {
                                     //lapartie.EnvoyerRéponse(this.Alias, message.Data.ToString());
-                                    await EnvoyerLobby(new Message { Categorie = "JEU", Type = "END", Data = partieEnCours.formatterLeaderBoard() }, this.idPartieActuel);
+                                    await EnvoyerLobby(new Message { Categorie = "JEU", Type = "END", Data = partieEnCours.ObtenirLeaderBoard() }, this.idPartieActuel);
                                 }
                                 Debug.Write("GSWS");
                                 break;
