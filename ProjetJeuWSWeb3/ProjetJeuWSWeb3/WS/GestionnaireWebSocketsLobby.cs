@@ -47,7 +47,7 @@ namespace ProjetJeuWSWeb3.WS
 
             idPartie = ServeurLobbyJeu.AjouterLobby(socket);
             JeuPhraseACompleter partie = new JeuPhraseACompleter();
-            partie.host = idPartie;
+            partie.Host = idPartie;
             ServeurLobbyJeu.AjouterPartie(partie);
             await EnvoyerA(new Message { Categorie = "LOBBY", Type = "DEBUTER", Data = idPartie }, socket);
 

@@ -69,7 +69,7 @@ namespace ProjetJeuWSWeb3.Models
             List<JeuPhraseACompleter>.Enumerator it = PartiesEnCours.GetEnumerator();
             while (it.MoveNext())
             {
-                if (it.Current.host == host)
+                if (it.Current.Host == host)
                 {
                     return it.Current;
                 }

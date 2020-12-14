@@ -214,7 +214,6 @@
             webSocket.send(JSON.stringify(msg));
         }
     }
-
         document.getElementById('bsubmitPhrase').onclick = function () {
             document.getElementById('bsubmitPhrase').disabled = true;
             document.getElementById('zoneJeu').style['display'] = "none";
@@ -323,7 +322,7 @@
                                 cacherTouteZone();
                                 document.getElementById('bsubmitPhrase').disabled = false;
                                 document.getElementById('zoneJeu').style['display'] = "block";
-                                document.getElementById('phrase1').innerHTML = partie.phraseACompleter;
+                                document.getElementById('phrase1').innerHTML = partie.PhraseACompleter;
                                 break;
                             case "ABANDON":
                                 break;

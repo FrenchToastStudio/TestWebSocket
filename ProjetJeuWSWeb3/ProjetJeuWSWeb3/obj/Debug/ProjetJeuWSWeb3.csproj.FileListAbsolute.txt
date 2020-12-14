@@ -382,3 +382,27 @@ C:\Users\Danny\Documents\Au2020\App Web 3\Projet\projetweb3ws\ProjetJeuWSWeb3\Pr
 C:\Users\Danny\Documents\Au2020\App Web 3\Projet\projetweb3ws\ProjetJeuWSWeb3\ProjetJeuWSWeb3\obj\Debug\ProjetJeuWSWeb3.csproj.CopyComplete
 C:\Users\Danny\Documents\Au2020\App Web 3\Projet\projetweb3ws\ProjetJeuWSWeb3\ProjetJeuWSWeb3\obj\Debug\ProjetJeuWSWeb3.dll
 C:\Users\Danny\Documents\Au2020\App Web 3\Projet\projetweb3ws\ProjetJeuWSWeb3\ProjetJeuWSWeb3\obj\Debug\ProjetJeuWSWeb3.pdb
+C:\Users\Guillaume\Documents\ecole\appweb3\Final\projetweb3ws\ProjetJeuWSWeb3\ProjetJeuWSWeb3\bin\BouncyCastle.Crypto.dll
+C:\Users\Guillaume\Documents\ecole\appweb3\Final\projetweb3ws\ProjetJeuWSWeb3\ProjetJeuWSWeb3\bin\Google.Protobuf.dll
+C:\Users\Guillaume\Documents\ecole\appweb3\Final\projetweb3ws\ProjetJeuWSWeb3\ProjetJeuWSWeb3\bin\K4os.Compression.LZ4.dll
+C:\Users\Guillaume\Documents\ecole\appweb3\Final\projetweb3ws\ProjetJeuWSWeb3\ProjetJeuWSWeb3\bin\K4os.Compression.LZ4.Streams.dll
+C:\Users\Guillaume\Documents\ecole\appweb3\Final\projetweb3ws\ProjetJeuWSWeb3\ProjetJeuWSWeb3\bin\K4os.Hash.xxHash.dll
+C:\Users\Guillaume\Documents\ecole\appweb3\Final\projetweb3ws\ProjetJeuWSWeb3\ProjetJeuWSWeb3\bin\MySql.Data.dll
+C:\Users\Guillaume\Documents\ecole\appweb3\Final\projetweb3ws\ProjetJeuWSWeb3\ProjetJeuWSWeb3\bin\Renci.SshNet.dll
+C:\Users\Guillaume\Documents\ecole\appweb3\Final\projetweb3ws\ProjetJeuWSWeb3\ProjetJeuWSWeb3\bin\System.Buffers.dll
+C:\Users\Guillaume\Documents\ecole\appweb3\Final\projetweb3ws\ProjetJeuWSWeb3\ProjetJeuWSWeb3\bin\System.Memory.dll
+C:\Users\Guillaume\Documents\ecole\appweb3\Final\projetweb3ws\ProjetJeuWSWeb3\ProjetJeuWSWeb3\bin\System.Numerics.Vectors.dll
+C:\Users\Guillaume\Documents\ecole\appweb3\Final\projetweb3ws\ProjetJeuWSWeb3\ProjetJeuWSWeb3\bin\System.Runtime.CompilerServices.Unsafe.dll
+C:\Users\Guillaume\Documents\ecole\appweb3\Final\projetweb3ws\ProjetJeuWSWeb3\ProjetJeuWSWeb3\bin\Ubiety.Dns.Core.dll
+C:\Users\Guillaume\Documents\ecole\appweb3\Final\projetweb3ws\ProjetJeuWSWeb3\ProjetJeuWSWeb3\bin\Zstandard.Net.dll
+C:\Users\Guillaume\Documents\ecole\appweb3\Final\projetweb3ws\ProjetJeuWSWeb3\ProjetJeuWSWeb3\bin\Google.Protobuf.pdb
+C:\Users\Guillaume\Documents\ecole\appweb3\Final\projetweb3ws\ProjetJeuWSWeb3\ProjetJeuWSWeb3\bin\Google.Protobuf.xml
+C:\Users\Guillaume\Documents\ecole\appweb3\Final\projetweb3ws\ProjetJeuWSWeb3\ProjetJeuWSWeb3\bin\K4os.Compression.LZ4.xml
+C:\Users\Guillaume\Documents\ecole\appweb3\Final\projetweb3ws\ProjetJeuWSWeb3\ProjetJeuWSWeb3\bin\K4os.Compression.LZ4.Streams.xml
+C:\Users\Guillaume\Documents\ecole\appweb3\Final\projetweb3ws\ProjetJeuWSWeb3\ProjetJeuWSWeb3\bin\K4os.Hash.xxHash.xml
+C:\Users\Guillaume\Documents\ecole\appweb3\Final\projetweb3ws\ProjetJeuWSWeb3\ProjetJeuWSWeb3\bin\MySql.Data.xml
+C:\Users\Guillaume\Documents\ecole\appweb3\Final\projetweb3ws\ProjetJeuWSWeb3\ProjetJeuWSWeb3\bin\Renci.SshNet.xml
+C:\Users\Guillaume\Documents\ecole\appweb3\Final\projetweb3ws\ProjetJeuWSWeb3\ProjetJeuWSWeb3\bin\System.Buffers.xml
+C:\Users\Guillaume\Documents\ecole\appweb3\Final\projetweb3ws\ProjetJeuWSWeb3\ProjetJeuWSWeb3\bin\System.Memory.xml
+C:\Users\Guillaume\Documents\ecole\appweb3\Final\projetweb3ws\ProjetJeuWSWeb3\ProjetJeuWSWeb3\bin\System.Numerics.Vectors.xml
+C:\Users\Guillaume\Documents\ecole\appweb3\Final\projetweb3ws\ProjetJeuWSWeb3\ProjetJeuWSWeb3\bin\System.Runtime.CompilerServices.Unsafe.xml

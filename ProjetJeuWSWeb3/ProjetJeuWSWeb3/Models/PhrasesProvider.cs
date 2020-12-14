@@ -2,6 +2,11 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
+using System.Data;
+using MySql.Data.MySqlClient;
+using System.Data.Common;
+using System.Data.SqlClient;
+using System.Diagnostics;
 
 namespace ProjetJeuWSWeb3.Models
 {
@@ -24,10 +29,68 @@ namespace ProjetJeuWSWeb3.Models
             return listePhrase;
         }
 
-        public static string getRandomPhrase() {
+        public string getRandomPhrase() {
             Random rnd = new Random();
-            int index = rnd.Next(listePhrase.Count);
-            return listePhrase[index];
+            int index = compterNbPhrases();
+            string phrase = obtenirPhrase(rnd.Next(1, index));
+            return phrase;
+        }
+
+        
+
+        private string obtenirPhrase(int idPhrase)
+        {
+            string phrase = "";
+
+            MySqlConnection connexion = new MySqlConnection();
+            connexion.ConnectionString = "Server=127.0.0.1;Uid=journalisteBDArticle;Pwd=motDePasse;Database=phrases;";
+
+            connexion.Open();
+            
+
+            MySqlCommand commande = connexion.CreateCommand();
+            commande.Connection = connexion;
+            commande.CommandText = "SELECT phrase FROM listePhrases WHERE id = @idPhrase;";
+            commande.Parameters.AddWithValue("idPhrase", idPhrase);
+
+            commande.CommandType = CommandType.Text;
+           
+            MySqlDataReader lecteur = commande.ExecuteReader();
+            
+            while (lecteur.Read())
+            {
+                phrase = lecteur.GetString(0);
+            }
+
+            connexion.Close();
+            return phrase;
+        }
+
+        private int compterNbPhrases()
+        {
+            int id = -1;
+            
+            MySqlConnection connexion = new MySqlConnection();
+            connexion.ConnectionString = "Server=127.0.0.1;Uid=journalisteBDArticle;Pwd=motDePasse;Database=phrases;";
+
+            connexion.Open();
+
+
+            MySqlCommand commande = connexion.CreateCommand();
+            commande.Connection = connexion;
+            commande.CommandText = "SELECT COUNT(id) AS number FROM listePhrases;";
+
+            commande.CommandType = CommandType.Text;
+            
+            MySqlDataReader lecteur = commande.ExecuteReader();
+            
+            while (lecteur.Read())
+            {
+                id = lecteur.GetInt32(0);
+            }
+
+            connexion.Close();
+            return id;
         }
     }
 }

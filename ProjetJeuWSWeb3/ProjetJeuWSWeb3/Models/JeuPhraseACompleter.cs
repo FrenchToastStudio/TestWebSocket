@@ -8,9 +8,9 @@ namespace ProjetJeuWSWeb3.Models
 {
     public class JeuPhraseACompleter
     {
-        public string host { get; set; }
+        public string Host { get; set; }
 
-        public string phraseACompleter { get; set; }
+        public string PhraseACompleter { get; set; }
 
         //liste des joeueurs
         public List<Joueur> lesJoueurs = new List<Joueur>();
@@ -88,7 +88,8 @@ namespace ProjetJeuWSWeb3.Models
         public void ProchainTour()
         {
             PartieDébuter = true;
-            phraseACompleter = PhrasesProvider.getRandomPhrase();
+            PhraseACompleter = new PhrasesProvider().getRandomPhrase();
+            Debug.WriteLine(PhraseACompleter);
             listeRéponses = new Dictionary<string, string>();
             listeVotes = new Dictionary<string, string>();
             tour += 1;
