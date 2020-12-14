@@ -145,7 +145,7 @@
 
     function envoyerPhrase(contenu) {
         document.getElementById('zoneJeu').style['display'] = "none";
-        console.log(contenu)
+        
         var msg = {
             Categorie: "JEU", Type: "GAME", Data: contenu
         }
@@ -156,7 +156,7 @@
 
     function voterPourPhrase(id) {
         document.getElementById('zoneVote').style['display'] = "none";
-
+        console.log(id)
         var msg = {
             Categorie: "JEU", Type: "VOTE", Data: id
         }
@@ -165,21 +165,6 @@
         }
 
     }
-    function setOnClick(id) {
-        document.getElementById('vt_' + id).onclick = function () {
-            voterPourPhrase(id);
-            console.log("click: " + cle);
-        };
-    }
-
-    document.getElementById('bsubmitPhrase').onclick = function () {
-        document.getElementById('bsubmitPhrase').disabled = true;
-        document.getElementById('zoneJeu').style['display'] = "none";
-        var finalString = document.getElementById('phrase1').innerHTML + " " + document.getElementById('phrasefinale').value;
-        envoyerPhrase(finalString);
-    }
-
-
 
     document.getElementById('bConnecterLobby').onclick = function () {
         document.getElementById('bConnecterLobby').disabled = true;
@@ -196,7 +181,7 @@
         document.getElementById('bsubmitPhrase').onclick = function () {
             document.getElementById('bsubmitPhrase').disabled = true;
             document.getElementById('zoneJeu').style['display'] = "none";
-            var finalString = document.getElementById('phrase1').innerHTML + " " + document.getElementById('phrasefinale').value;
+            var finalString = document.getElementById('phrasefinale').value;
             document.getElementById('phrasefinale').value = ""
             envoyerPhrase(finalString);
         }
@@ -302,35 +287,25 @@
                                 prochaineRonde(msg.Data)
                                 break;
                             case "PHASEVOTE":
+                                document.getElementById('votes').innerHTML = "";
                                 var phrases = msg.Data;
                                 for (var key in phrases) {
                                     if (key != alias) {
-                                        document.getElementById('votes').innerHTML += "<li class='membre' id='vt_" + key + "'>" + phrases[key] + "</li>";
-                                        console.log("before: " + phrases[key]);
-                                        setOnClick(key);
+                                        document.getElementById('votes').innerHTML += "<li class='membre' id='vt_" + key + "' onclick='voterPourPhrase(" + key  + ")' >" + phrases[key] + "</li>";
+                                        console.log("before: " + key);
+                                        
                                     }
                                 }
+                                document.getElementById('zoneVote').style['display'] = "block";
+                                break;
                         }
-                        document.getElementById('zoneVote').style['display'] = "block";
-                        break;
                         break;
                     case "PUBLIC":
                         switch (msg.Type) {
                             case "START":
                                 afficherPublic();
                                 break;
-                            case "PHASEVOTE":
-                                var phrases = msg.Data;
-                                document.getElementById('votes').innerHTML = "";
-                                for (var key in phrases) {
-                                    if (key != alias) {
-                                        document.getElementById('votes').innerHTML += "<li class='membre' id='vt_" + key + "'>" + phrases[key] + "</li>";
-                                        console.log("before: " + phrases[key]);
-                                        setOnClick(key, phrases[key]);
-                                    }
-                                }
-                                document.getElementById('zoneVote').style['display'] = "block";
-                                break;
+                            
                             case "SCORE":
                                 console.log("stats recus");
                                 break;

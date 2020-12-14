@@ -135,7 +135,7 @@ namespace ProjetJeuWSWeb3.WS
                                         }
                                         foreach(Joueur foule in jeu.lesSpectateur)
                                         {
-                                            await EnvoyerA(new Message { Categorie = "PUBLIC", Type = "PHASEVOTE", Data = jeu.listeRéponses }, foule.Nom);
+                                            await EnvoyerA(new Message { Categorie = "JEU", Type = "PHASEVOTE", Data = jeu.listeRéponses }, foule.Nom);
                                         }
                                     }
                                 }
