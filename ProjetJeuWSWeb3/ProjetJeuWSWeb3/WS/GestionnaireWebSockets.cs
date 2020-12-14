@@ -99,29 +99,46 @@ namespace ProjetJeuWSWeb3.WS
                 message = JsonConvert.DeserializeObject<Message>(str);
                 switch (message.Categorie)
                 {
+                    /**
+                     * Se connecte au web socket de chat 
+                     */
                     case "CONNECTE":
                         switch (message.Type)
                         {
+                            /**
+                             * Lorsque qu'un joueur se déconnecte du WS de chat
+                             */
                             case "QUIT":
                                 await EnvoyerATousDeLaPartDe(new Message { Categorie = "CONNECTE", Type = "DEL", Data = this.Alias }, socket);
-                                //TODO:
-                                //  - Supprimer les parties et les invitations de this.Alias.
                                 break;
+                                /**
+                                 * Lorsque le joueur se connecte à un Lobby de jeu
+                                 */
                             case "PARTIE":
                                 idPartieActuel = message.Data.ToString();
                                 await EnvoyerLobby(new Message { Categorie = "CONNECTER", Type = "ADD", Data = this.Alias }, message.Data.ToString());
                                 break;
                         }
                         break;
+                        /**
+                         * La réception d'un message de chat
+                         * Tout le monde peut voir les messages avec temps 
+                         */
                     case "MESSAGE":
                         this.messageChat.dateMessage = DateTime.Now;
                         this.messageChat.Contenu = message.Data.ToString();
                         string messageString = messageChat.toString();
                         await EnvoyerATous(new Message {Categorie = "MESSAGE",Type="CHAT",Data= messageString });
                         break;
+                        /**
+                         * Le déroulement d'un jeu et les cas selon l'état 
+                         */
                     case "JEU":
                         switch (message.Type)
                         {
+                            /**
+                             * Lorsque le joueur envoie un vote pour une phrase
+                             */
                             case "VOTE":
                                 partieEnCours = ServeurLobbyJeu.GetPartieDe(this.idPartieActuel);
                                 if (partieEnCours != null)
@@ -130,9 +147,15 @@ namespace ProjetJeuWSWeb3.WS
                                 }
                                 await EnvoyerLobby(new Message { Categorie = "JEU", Type = "VOTER", Data = this.Alias }, idPartieActuel);
                                 break;
+                                /**
+                                 * Lorsque le joueur reçois un message de démarrer la partie
+                                 */
                             case "DEMARRER":
                                 await EnvoyerLobby(new Message { Categorie = "JEU", Type = "DEBUTER", Data = this.Alias }, idPartieActuel);
                                 break;
+                                /**
+                                 * Lorsque le joueur à fini sa phrase de jeu
+                                 */
                             case "GAME":
                                 JeuPhraseACompleter partie = ServeurLobbyJeu.GetPartieDe(this.idPartieActuel);
                                 
@@ -142,6 +165,9 @@ namespace ProjetJeuWSWeb3.WS
                                     await EnvoyerLobby(new Message { Categorie = "JEU", Type = "PHRASECOMPLETER", Data = message.Data.ToString() }, this.idPartieActuel);
                                 }
                                 break;
+                                /**
+                                 * Lorsque la partie fini
+                                 */
                             case "FIN":
                                 partieEnCours = ServeurLobbyJeu.GetPartieDe(this.idPartieActuel);
 
@@ -150,7 +176,6 @@ namespace ProjetJeuWSWeb3.WS
                                     //lapartie.EnvoyerRéponse(this.Alias, message.Data.ToString());
                                     await EnvoyerLobby(new Message { Categorie = "JEU", Type = "END", Data = partieEnCours.ObtenirLeaderBoard() }, this.idPartieActuel);
                                 }
-                                Debug.Write("GSWS");
                                 break;
                         }
                         break;
