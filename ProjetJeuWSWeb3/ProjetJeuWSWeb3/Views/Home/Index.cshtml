@@ -350,7 +350,7 @@
                                 var phrases = msg.Data;
                                 for (var key in phrases) {
                                     if (key != alias) {
-                                        document.getElementById('votes').innerHTML += "<li class='membre' id='vt_" + key + "' onclick='voterPourPhrase(" + key  + ")' >" + phrases[key] + "</li>";
+                                        document.getElementById('votes').innerHTML += "<li class='membre list-group-item li-votation' id='vt_" + key + "' onclick='voterPourPhrase(" + key  + ")' >" + phrases[key] + "</li>";
                                         console.log("before: " + key);
 
                                     }
