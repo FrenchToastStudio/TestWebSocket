@@ -3,10 +3,33 @@
     padding-bottom: 20px;
 }
 
-/* Set padding to keep content from hitting the edges */
+/* Set padding to keep content from hitting the edges
 .body-content {
     padding-left: 15px;
     padding-right: 15px;
+} */
+
+body{
+    /* The image used */
+    background-image: url("https://images.unsplash.com/photo-1607048323234-373af2636ac1");
+    /* Full height */
+    height: 100%;
+    width: 100%;
+    /* Center and scale the image nicely */
+    background-repeat: no-repeat;
+    background-size: cover;
+}
+
+#overlay {
+    position: fixed; /* Sit on top of the page content */
+    width: 100%; /* Full width (cover the whole page) */
+    height: 100%; /* Full height (cover the whole page) */
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0,0,0,0.5); /* Black background with opacity */
+    z-index: 2; /* Specify a stack order in case you're using a different order for other elements */
 }
 
 /* Set width on the form input elements since they're 100% wide by default */
@@ -14,4 +37,21 @@ input,
 select,
 textarea {
     max-width: 280px;
+}
+
+h1, h2, h3, h4, h5, ul, li{
+    color:white;
+}
+
+.li-votation{
+    color:black !important;
+}
+
+.stuff-after-jumbo {
+    padding-left: 15px !important;
+    padding-right: 15px !important;
+}
+
+.imgJumbot {
+    background-image: url("https://images.unsplash.com/photo-1496167117681-944f702be1f4");
 }
