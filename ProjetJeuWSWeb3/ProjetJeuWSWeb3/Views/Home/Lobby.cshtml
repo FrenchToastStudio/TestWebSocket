@@ -31,214 +31,223 @@
     #zoneFinPartie {
         display: none;
     }
+    .row {
+        margin-right: 0px !important;
+        margin-left: 0px !important;
+    }
+
 </style>
-<h2 id="idPartie">Lobby</h2>
-<div class="row" id="creerLobby" >
-    <input type="button" id="bCreerLobby" value="Creer le salon" />
-</div>
-<div class="row" id="zoneDébut">
-    <ul id="connecte"></ul>
-</div>
-<div class="row" id="zonePhrase">
-    <h2>Les joueurs dans cette ronde :</h2>
-    <ul id="connectesLoby"></ul><br/>
-    <h2>Entrer ce que cette phrase vous inspire </h2>
-    <h2 id="phaseACompleter"></h2>
-</div>
-<div class="row" id="zoneVote">
-    <h2>Veuillez voter sur la phrase qui vous inspire le plus! </h2>
-    <span id="phaseACompleter"></span>
-    <ul id="phraseRecus"></ul>
-    <ul id="connectesVote"></ul>
-</div>
-<div class="row" id="zoneResultat">
-    <ul id="votes"></ul>
-</div>
-<div class="row" id="zoneFinPartie">
-    <h2>Merci d'Avoir joué!</h2>
-</div>
-<div class="row" id="zoneLeaderBoard">
-    <ul id="leaderboard"></ul>
-</div>
-<div class="row" id="zonePublic">
-    <p id="nbSpectarteur">Nb de Spectateur: 0</p>
+<div id="overlay">
+    <div class="jumbotron container-fluid">
+        <h1 id="idPartie" class="text-center">Lobby</h1>
+    </div>
+    <div class="row stuff-after-jumbo" id="creerLobby">
+        <button type="button" id="bCreerLobby" value="Creer le salon" class="btn btn-success btn-block btn-lg mx-15">Creer Salon</button>
+    </div>
+    <div class="row" id="zoneDébut">
+        <ul id="connecte"></ul>
+    </div>
+    <div class="row" id="zonePhrase">
+        <h2>Les joueurs dans cette ronde :</h2>
+        <ul id="connectesLoby"></ul><br />
+        <h2>Entrer ce que cette phrase vous inspire </h2>
+        <h2 id="phaseACompleter"></h2>
+    </div>
+    <div class="row" id="zoneVote">
+        <h2>Veuillez voter sur la phrase qui vous inspire le plus! </h2>
+        <span id="phaseACompleter"></span>
+        <ul id="phraseRecus"></ul>
+        <ul id="connectesVote"></ul>
+    </div>
+    <div class="row" id="zoneResultat">
+        <ul id="votes"></ul>
+    </div>
+    <div class="row" id="zoneFinPartie">
+        <h2>Merci d'Avoir joué!</h2>
+    </div>
+    <div class="row" id="zoneLeaderBoard">
+        <ul id="leaderboard"></ul>
+    </div>
+    <div class="row stuff-after-jumbo" id="zonePublic">
+        <h4 id="nbSpectarteur">Nb de Spectateur: 0</h4>
+    </div>
 </div>
 
-<script>
-    var webSocket = null;
-    var idPartie = null;
-    var nbSpectateur = 0;
-    var joueurs = [];
+    <script>
+        var webSocket = null;
+        var idPartie = null;
+        var nbSpectateur = 0;
+        var joueurs = [];
 
-    function ajouterConnecte(nom) {
-        console.log(nom);
-        joueurs.push(nom);
-        document.getElementById('connecte').innerHTML += "<li class='membre' id='connecte" + nom + "'>" + nom + "</li>";
-        document.getElementById('connectesVote').innerHTML += "<li class='membre' id='connecteVote" + nom + "'>" + nom + "</li>";
-        document.getElementById('connectesLoby').innerHTML += "<li class='membre' id='connecteLoby" + nom + "'>" + nom + "</li>";
-    }
-
-    function ajouterSpectateur() {
-        console.log("ok shawty");
-        nbSpectateur += 1;
-        document.getElementById('nbSpectarteur').innerHTML = "Nb de Spectateur: " + nbSpectateur;
-    }
-
-    function envoyerVote(nom) {
-        document.getElementById(msg.Data).style['display'] = "block";
-    }
-
-    function afficherLeaderboard(leaderboard) {
-
-        console.log(leaderboard);
-        document.getElementById('zoneLeaderBoard').style['display'] = "block";
-        leaderboard.forEach(element => document.getElementById('leaderboard').innerHTML += "<li class='participant' id='" + element.Nom + "'>" + element.Nom  + " : " + element.pointage + "</li>");
-    }
-
-    function prochaineRonde(phrase) {
-        console.log(phrase);
-        document.getElementById('zoneDébut').style['display'] = "none";
-        document.getElementById('zonePhrase').style['display'] = "block";
-        document.getElementById('phaseACompleter').innerHTML = phrase;
-    }
-
-    function prevenirPhraseCompleter() {
-        var msg = {
-            Categorie: "JEU", Type: "PHRASECOMPLETER"
+        function ajouterConnecte(nom) {
+            console.log(nom);
+            joueurs.push(nom);
+            document.getElementById('connecte').innerHTML += "<li class='membre' id='connecte" + nom + "'>" + nom + "</li>";
+            document.getElementById('connectesVote').innerHTML += "<li class='membre' id='connecteVote" + nom + "'>" + nom + "</li>";
+            document.getElementById('connectesLoby').innerHTML += "<li class='membre' id='connecteLoby" + nom + "'>" + nom + "</li>";
         }
-        webSocket.send(JSON.stringify(msg));
-    }
 
-    function commencerPartie() {
-        var msg = {
-            Categorie: "JEU", Type: "START"
+        function ajouterSpectateur() {
+            console.log("ok shawty");
+            nbSpectateur += 1;
+            document.getElementById('nbSpectarteur').innerHTML = "Nb de Spectateur: " + nbSpectateur;
         }
-        webSocket.send(JSON.stringify(msg));
-    }
 
-    function afficherPhaseVote() {
-        document.getElementById('zonePhrase').style['display'] = "none";
-        document.getElementById('zoneVote').style['display'] = "block";
-    }
-
-    function lancerProchaineRonde() {
-        var msg = {
-            Categorie: "JEU", Type: "START"
+        function envoyerVote(nom) {
+            document.getElementById(msg.Data).style['display'] = "block";
         }
-        webSocket.send(JSON.stringify(msg));
-    }
 
-    function lancerAfficherLeaderboard() {
-        console.log("YOOO");
-        var msg = {
-            Categorie: "JEU", Type: "TOURTERMINER"
+        function afficherLeaderboard(leaderboard) {
+
+            console.log(leaderboard);
+            document.getElementById('zoneLeaderBoard').style['display'] = "block";
+            leaderboard.forEach(element => document.getElementById('leaderboard').innerHTML += "<li class='participant' id='" + element.Nom + "'>" + element.Nom + " : " + element.pointage + "</li>");
         }
-        webSocket.send(JSON.stringify(msg));
-    }
 
+        function prochaineRonde(phrase) {
+            console.log(phrase);
+            document.getElementById('zoneDébut').style['display'] = "none";
+            document.getElementById('zonePhrase').style['display'] = "block";
+            document.getElementById('phaseACompleter').innerHTML = phrase;
+        }
 
-    document.getElementById('bCreerLobby').onclick = function () {
-        if (webSocket == null) {
-
-            var URL = "ws://localhost:57339/api/websocket/lobby/";
-            webSocket = new WebSocket(URL)
-            webSocket.onopen = function () {
-                document.getElementById('creerLobby').style['display'] = "none";
-                document.getElementById('zoneDébut').style['display'] = "block";
+        function prevenirPhraseCompleter() {
+            var msg = {
+                Categorie: "JEU", Type: "PHRASECOMPLETER"
             }
-            webSocket.onclose = function (event) {
-                document.getElementById('zoneDébut').style['display'] = "none";
-                document.getElementById('zoneLeaderBoard').style['display'] = "none";
-                document.getElementById('creerLobby').style['display'] = "block";
+            webSocket.send(JSON.stringify(msg));
+        }
+
+        function commencerPartie() {
+            var msg = {
+                Categorie: "JEU", Type: "START"
             }
+            webSocket.send(JSON.stringify(msg));
+        }
 
-            webSocket.onerror = function (event) {
-                //document.getElementById('console').innerHTML += "ERREUR: " + event.message + "<br />";
+        function afficherPhaseVote() {
+            document.getElementById('zonePhrase').style['display'] = "none";
+            document.getElementById('zoneVote').style['display'] = "block";
+        }
+
+        function lancerProchaineRonde() {
+            var msg = {
+                Categorie: "JEU", Type: "START"
             }
+            webSocket.send(JSON.stringify(msg));
+        }
 
-            webSocket.onmessage = function (event) {
-                var msg = JSON.parse(event.data);
+        function lancerAfficherLeaderboard() {
+            console.log("YOOO");
+            var msg = {
+                Categorie: "JEU", Type: "TOURTERMINER"
+            }
+            webSocket.send(JSON.stringify(msg));
+        }
 
-                console.log(msg.Categorie);
-                console.log(msg.Type);
-                console.log(msg.Data);
-                switch (msg.Categorie) {
-                    case "JEU":
-                        switch (msg.Type) {
-                            case "NEXTROUND":
-                                var partie = msg.Data;
-                                document.getElementById('zonePhrase').style['display'] = 'none';
-                                document.getElementById('zoneVote').style['display'] = 'none';
-                                document.getElementById('zoneLeaderBoard').style['display'] = 'none';
-                                prochaineRonde(partie.phraseACompleter);
-                                break;
-                            case "PHRASECOMPLETER":
-                                prevenirPhraseCompleter();
-                                break;
-                            case "AFFICHERVOTE":
-                                votes = msg.Data; zoneVote
-                                document.getElementById('zonePhrase').style['display'] = 'none';
-                                document.getElementById('zoneVote').style['display'] = 'none';
-                                document.getElementById('zoneResultat').style['display'] = 'block';
-                                for (var key in votes) {
-                                    document.getElementById('votes').innerHTML += "<li class='votes'>" + key + ": "+ votes[key] + "</li>";
-                                }
-                                setTimeout(lancerAfficherLeaderboard, 3000)
-                                break;
-                            case "JOUEURVOTE":
-                                ajouterJoueurVote(msg.data);
-                                break;
-                            case "DEBUTER":
-                                console.log("Let the game begin");
-                                commencerPartie();
-                                break;
-                            case "PHASEVOTE":
-                                afficherPhaseVote()
-                                break;
-                            case "VOTER":
-                                var msg = {
-                                    Categorie: "JEU", Type: "VOTECOMPLETER", Data: msg.Data
-                                }
-                                webSocket.send(JSON.stringify(msg));
-                                break;
-                            case "LEADERBOARD":
-                                document.getElementById('zonePhrase').style['display'] = 'none';
-                                document.getElementById('zoneVote').style['display'] = 'none';
-                                document.getElementById('zoneResultat').style['display'] = 'none';
-                                document.getElementById('zoneLeaderBoard').style['display'] = 'block';
-                                afficherLeaderboard(msg.Data);
-                                setTimeout(lancerProchaineRonde, 3000)
-                                break;
-                            case "PARTIETERMINER":
-                                break;
-                        }
-                        break;
-                    case "CONNECTER":
-                        switch (msg.Type) {
-                            case "ADD":
-                                var msg = {
-                                    Categorie: "CONNECTER", Type: "ADDJOUEUR", Data: msg.Data
-                                }
-                                webSocket.send(JSON.stringify(msg));
-                                break;
-                            case "NOUVEAUJOUEUR":
-                                console.log("passe ici");
-                                ajouterConnecte(msg.Data);
-                                break;
-                            case "NOUVEAUSPECTATEUR":
-                                ajouterSpectateur();
-                                break;
-                        }
-                        break;
-                    case "LOBBY":
-                        switch (msg.Type) {
-                            case "DEBUTER":
-                                document.getElementById('idPartie').innerHTML += ": " + msg.Data;
-                                break;
-                        }
-                        break;
+
+        document.getElementById('bCreerLobby').onclick = function () {
+            if (webSocket == null) {
+
+                var URL = "ws://localhost:57339/api/websocket/lobby/";
+                webSocket = new WebSocket(URL)
+                webSocket.onopen = function () {
+                    document.getElementById('creerLobby').style['display'] = "none";
+                    document.getElementById('zoneDébut').style['display'] = "block";
+                }
+                webSocket.onclose = function (event) {
+                    document.getElementById('zoneDébut').style['display'] = "none";
+                    document.getElementById('zoneLeaderBoard').style['display'] = "none";
+                    document.getElementById('creerLobby').style['display'] = "block";
+                }
+
+                webSocket.onerror = function (event) {
+                    //document.getElementById('console').innerHTML += "ERREUR: " + event.message + "<br />";
+                }
+
+                webSocket.onmessage = function (event) {
+                    var msg = JSON.parse(event.data);
+
+                    console.log(msg.Categorie);
+                    console.log(msg.Type);
+                    console.log(msg.Data);
+                    switch (msg.Categorie) {
+                        case "JEU":
+                            switch (msg.Type) {
+                                case "NEXTROUND":
+                                    var partie = msg.Data;
+                                    document.getElementById('zonePhrase').style['display'] = 'none';
+                                    document.getElementById('zoneVote').style['display'] = 'none';
+                                    document.getElementById('zoneLeaderBoard').style['display'] = 'none';
+                                    prochaineRonde(partie.phraseACompleter);
+                                    break;
+                                case "PHRASECOMPLETER":
+                                    prevenirPhraseCompleter();
+                                    break;
+                                case "AFFICHERVOTE":
+                                    votes = msg.Data; zoneVote
+                                    document.getElementById('zonePhrase').style['display'] = 'none';
+                                    document.getElementById('zoneVote').style['display'] = 'none';
+                                    document.getElementById('zoneResultat').style['display'] = 'block';
+                                    for (var key in votes) {
+                                        document.getElementById('votes').innerHTML += "<li class='votes'>" + key + ": " + votes[key] + "</li>";
+                                    }
+                                    setTimeout(lancerAfficherLeaderboard, 3000)
+                                    break;
+                                case "JOUEURVOTE":
+                                    ajouterJoueurVote(msg.data);
+                                    break;
+                                case "DEBUTER":
+                                    console.log("Let the game begin");
+                                    commencerPartie();
+                                    break;
+                                case "PHASEVOTE":
+                                    afficherPhaseVote()
+                                    break;
+                                case "VOTER":
+                                    var msg = {
+                                        Categorie: "JEU", Type: "VOTECOMPLETER", Data: msg.Data
+                                    }
+                                    webSocket.send(JSON.stringify(msg));
+                                    break;
+                                case "LEADERBOARD":
+                                    document.getElementById('zonePhrase').style['display'] = 'none';
+                                    document.getElementById('zoneVote').style['display'] = 'none';
+                                    document.getElementById('zoneResultat').style['display'] = 'none';
+                                    document.getElementById('zoneLeaderBoard').style['display'] = 'block';
+                                    afficherLeaderboard(msg.Data);
+                                    setTimeout(lancerProchaineRonde, 3000)
+                                    break;
+                                case "PARTIETERMINER":
+                                    break;
+                            }
+                            break;
+                        case "CONNECTER":
+                            switch (msg.Type) {
+                                case "ADD":
+                                    var msg = {
+                                        Categorie: "CONNECTER", Type: "ADDJOUEUR", Data: msg.Data
+                                    }
+                                    webSocket.send(JSON.stringify(msg));
+                                    break;
+                                case "NOUVEAUJOUEUR":
+                                    console.log("passe ici");
+                                    ajouterConnecte(msg.Data);
+                                    break;
+                                case "NOUVEAUSPECTATEUR":
+                                    ajouterSpectateur();
+                                    break;
+                            }
+                            break;
+                        case "LOBBY":
+                            switch (msg.Type) {
+                                case "DEBUTER":
+                                    document.getElementById('idPartie').innerHTML += ": " + msg.Data;
+                                    break;
+                            }
+                            break;
+                    }
                 }
             }
         }
-    }
-</script>
+    </script>
