@@ -24,11 +24,15 @@ namespace ProjetJeuWSWeb3.Models
         private bool PartieDébuter = false;
 
         //régle du jeu
-        private int nbTourMax = 2;
+        private int nbTourMax = 3;
         private int pointParVote = 100;
         private int nbJoueurMax = 10;
+        public int NbJoueurMinimum = 3;
 
-
+        /**
+         * permet de véfieir si le joueur est dans la partie
+         * return bool
+         */
         public bool EstDansPartie(string nom) 
         {
             for (int i =0;i<lesJoueurs.Count;i++) 
@@ -41,16 +45,26 @@ namespace ProjetJeuWSWeb3.Models
             return false;
         }
 
+        /**
+         * permet de vérifier si la partie est fini
+         * Return bool
+         */
         public bool VérifierPartieFini()
         {
             return nbTourMax < tour;
         }
 
+        /**
+         * permet de vérifier si la aprtie est débuter
+         * return bool
+         */
         public bool VréifierPartieDébuter() 
         {
             return PartieDébuter;
         }
-
+        /**
+         * permet a un joueur de completer un phrase
+         */
         public void EnvoyerRéponse(string joueur, string restantPhrase)
         {
             if (!listeRéponses.ContainsKey(joueur)) {
@@ -59,6 +73,9 @@ namespace ProjetJeuWSWeb3.Models
             }
         }
 
+        /**
+         * Retourne une liste de joueur classé par le plus haut pointage
+         */
         public List<Joueur> ObtenirLeaderBoard()
         {
             Dictionary<string, int> leaderboard= new Dictionary<string, int>();
@@ -75,54 +92,73 @@ namespace ProjetJeuWSWeb3.Models
             return lesJoueurs;
         }
 
+        /**
+         * ajoute le pointage d'un joueur
+         */
         public void changerPointJoueur(int id,int point) 
         {
             lesJoueurs[id].pointage = point;
         }
 
+        /**
+         * Vérifie si tout les joueur sont dans la partie
+         * Return bool
+         */
         internal bool vérifierSijoueurMaxAtteint()
         {
             return this.lesJoueurs.Count >= this.nbJoueurMax;
         }
 
+        /**
+         * passe au prochain tour
+         */
         public void ProchainTour()
         {
             PartieDébuter = true;
             PhraseACompleter = new PhrasesProvider().getRandomPhrase();
-            Debug.WriteLine(PhraseACompleter);
             listeRéponses = new Dictionary<string, string>();
             listeVotes = new Dictionary<string, string>();
             tour += 1;
 
         }
 
+        /**
+         * Permet de vérifier si tout les joeueur on envoyer leur phrase
+         * Retur bool
+         */
         public bool VérifierToutePhrasesJoueur()
         {
             return listeRéponses.Count == lesJoueurs.Count;
         }
 
+        /**
+         * Premet d'ajouter un joueur a la liste de joueur
+         */
         public void AjouterJoueur(string v)
         {
             Joueur unJoueur = new Joueur();
             unJoueur.Nom = v;
-            if (lesJoueurs.Count >= nbJoueurMax && !PartieDébuter)
-            {
-                unJoueur.estAudience = true;
-                lesSpectateur.Add(unJoueur);
-            }
-            else
-            {
-                unJoueur.estAudience = false;
-                lesJoueurs.Add(unJoueur);
-            }
+            lesJoueurs.Add(unJoueur);
         }
 
+        public void AjouterAudience(string v) {
+            Joueur unJoueur = new Joueur();
+            unJoueur.Nom = v;
+            lesSpectateur.Add(unJoueur);
+        }
+
+        /**
+         * Permet de vérifier si tout le monde a voter
+         */
         public bool VérifierToutVote()
         {
             int nbVotes = lesJoueurs.Count + lesSpectateur.Count;
             return listeVotes.Count == nbVotes;
         }
 
+        /**
+         * Permet a un utilisateur de voter pour la phrase d'un autre utilsiateur
+         */
         public void voter(string alias, string idJoeurVoterPour)
         {
             foreach (Joueur joueur in lesJoueurs) {
@@ -133,6 +169,10 @@ namespace ProjetJeuWSWeb3.Models
             listeVotes.Add(alias, idJoeurVoterPour);
         }
 
+        /**
+         * Récupère les votes des utilisateur et les compile
+         * return Dictionary<string, int> 
+         */
         internal Dictionary<string, int> ObtenirVote()
         {
 
@@ -163,6 +203,10 @@ namespace ProjetJeuWSWeb3.Models
             
         }
 
+        /**
+         * Classe les les phrase par les phrase voté le plus
+         * Return Dictionary<string, int>
+         */
         private Dictionary<string, int> classéDictionnaireVote(Dictionary<string, int> votes)
         {
             Dictionary<string, int> voteClassé = new Dictionary<string, int>();

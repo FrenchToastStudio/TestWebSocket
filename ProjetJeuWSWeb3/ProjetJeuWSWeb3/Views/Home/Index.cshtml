@@ -230,7 +230,6 @@
             Categorie: "CONNECTE", Type: "PARTIE", Data: document.getElementById('numeroLobby').value
         }
         if (webSocket != null) {
-            console.log(document.getElementById('numeroLobby').value);
             webSocket.send(JSON.stringify(msg));
         }
     }
@@ -302,9 +301,6 @@
             webSocket.onmessage = function (event) {
                 var msg = JSON.parse(event.data);
 
-                    console.log(msg.Categorie);
-                    console.log(msg.Type);
-                    console.log(msg.Data);
                 switch (msg.Categorie) {
                     /**
                      *Lorsque un joueur se connecte,déconnecte ou joins un partie
@@ -313,6 +309,7 @@
                         switch (msg.Type) {
                             case "PREMIERJOUEUR":
                                 document.getElementById('bsubmitDemmarerPartie').style['display'] = "block";
+                                document.getElementById('bsubmitDemmarerPartie').disabled = true;
                                 break;
                             case "ADD":
                                 ajouterConnecte(msg.Data);
@@ -324,18 +321,7 @@
                                 document.getElementById('connectes').innerHTML = '';
                                 msg.Data.forEach((e) => { if (e != alias) ajouterConnecte(e); });
                                 break;
-                            case "PARTIE":
-                                break;
-                        }
-                        break;
-                    /**
-                     * Si un joueur reçois un message d'être dans la foule
-                     */
-                    case "CONNECTER":
-                        switch (msg.Type) {
-                            case "NOUVEAUSPECTATEUR":
-                                afficherPublic();
-                                break;
+
                         }
                         break;
                     //Réception d'un message de chat
@@ -354,10 +340,6 @@
                                 document.getElementById('zoneJeu').style['display'] = "block";
                                 document.getElementById('phrase1').innerHTML = partie.PhraseACompleter;
                                 break;
-                            case "ABANDON":
-                                break;
-                            case "GAME":
-                                break;
                             //Lorsque la pronchaine ronde doit commencer
                             case "NEXTROUND":
                                 prochaineRonde(msg.Data)
@@ -375,6 +357,10 @@
                                 }
                                 document.getElementById('zoneVote').style['display'] = "block";
                                 break;
+                            //permet au joueur de pouvoir commencer la parite en activant son bouton
+                            case "PEUTCOMMENCERLOBBY":
+                                document.getElementById('bsubmitDemmarerPartie').disabled = false;
+                                break;
                         }
                         break;
                     //Lorsque le public reçois des messages
@@ -383,11 +369,9 @@
                             //Afficher le layout pour le public
                             case "START":
                                 afficherPublic();
+                                cacherTouteZone();
                                 break;
                             //Afficher le score de la partie
-                            case "SCORE":
-                                console.log("stats recus");
-                                break;
                         }
                         break;
                 }

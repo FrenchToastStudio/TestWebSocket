@@ -79,31 +79,35 @@
         var nbSpectateur = 0;
         var joueurs = [];
 
+        //Permet d'ajouter un joueru connecter dans la liste du lobby
         function ajouterConnecte(nom) {
-            console.log(nom);
             joueurs.push(nom);
             document.getElementById('connecte').innerHTML += "<li class='membre' id='connecte" + nom + "'>" + nom + "</li>";
             document.getElementById('connectesVote').innerHTML += "<li class='membre' id='connecteVote" + nom + "'>" + nom + "</li>";
             document.getElementById('connectesLoby').innerHTML += "<li class='membre' id='connecteLoby" + nom + "'>" + nom + "</li>";
         }
 
+        //Ajouter un specteur a la liste
         function ajouterSpectateur() {
             console.log("ok shawty");
             nbSpectateur += 1;
             document.getElementById('nbSpectarteur').innerHTML = "Nb de Spectateur: " + nbSpectateur;
         }
 
+        //Envoi le vote 
         function envoyerVote(nom) {
             document.getElementById(msg.Data).style['display'] = "block";
         }
 
+        //Affiche le leaderboard dans le html
         function afficherLeaderboard(leaderboard) {
-
+            document.getElementById('leaderboard').innerHTML = "";
             console.log(leaderboard);
             document.getElementById('zoneLeaderBoard').style['display'] = "block";
             leaderboard.forEach(element => document.getElementById('leaderboard').innerHTML += "<li class='participant' id='" + element.Nom + "'>" + element.Nom + " : " + element.pointage + "</li>");
         }
 
+        //lance la prochaine round et affihe la phrase dans le html
         function prochaineRonde(phrase) {
             console.log(phrase);
             document.getElementById('zoneDébut').style['display'] = "none";
@@ -111,6 +115,7 @@
             document.getElementById('phaseACompleter').innerHTML = phrase;
         }
 
+        //préviens le serveur d'un phrase qui a été completer
         function prevenirPhraseCompleter() {
             var msg = {
                 Categorie: "JEU", Type: "PHRASECOMPLETER"
@@ -118,6 +123,7 @@
             webSocket.send(JSON.stringify(msg));
         }
 
+        //préviens ls serveur que la partie a débuter
         function commencerPartie() {
             var msg = {
                 Categorie: "JEU", Type: "START"
@@ -125,27 +131,30 @@
             webSocket.send(JSON.stringify(msg));
         }
 
+        //affiche la phase de vote dans le html 
         function afficherPhaseVote() {
             document.getElementById('zonePhrase').style['display'] = "none";
             document.getElementById('zoneVote').style['display'] = "block";
         }
 
+        //préviens le serveur de lancer la prochaine ronde
         function lancerProchaineRonde() {
+            document.getElementById('zoneLeaderBoard').style['display'] = 'none';
             var msg = {
                 Categorie: "JEU", Type: "START"
             }
             webSocket.send(JSON.stringify(msg));
         }
 
+        //préviens le servuer que le tour est terminer
         function lancerAfficherLeaderboard() {
-            console.log("YOOO");
             var msg = {
                 Categorie: "JEU", Type: "TOURTERMINER"
             }
             webSocket.send(JSON.stringify(msg));
         }
 
-
+        //permet de créer le lobby
         document.getElementById('bCreerLobby').onclick = function () {
             if (webSocket == null) {
 
@@ -168,12 +177,10 @@
                 webSocket.onmessage = function (event) {
                     var msg = JSON.parse(event.data);
 
-                    console.log(msg.Categorie);
-                    console.log(msg.Type);
-                    console.log(msg.Data);
                     switch (msg.Categorie) {
                         case "JEU":
                             switch (msg.Type) {
+                                //lance la prochaine rond
                                 case "NEXTROUND":
                                     var partie = msg.Data;
                                     document.getElementById('zonePhrase').style['display'] = 'none';
@@ -181,9 +188,11 @@
                                     document.getElementById('zoneLeaderBoard').style['display'] = 'none';
                                     prochaineRonde(partie.PhraseACompleter);
                                     break;
+                                //cas qui prévien le serveur lorsqu'un joueur compelte sa phrase
                                 case "PHRASECOMPLETER":
                                     prevenirPhraseCompleter();
                                     break;
+                                //Cas qui permet d'afficher les vote
                                 case "AFFICHERVOTE":
                                     votes = msg.Data; zoneVote
                                     document.getElementById('zonePhrase').style['display'] = 'none';
@@ -192,33 +201,44 @@
                                     for (var key in votes) {
                                         document.getElementById('votes').innerHTML += "<li class='votes'>" + key + ": " + votes[key] + "</li>";
                                     }
-                                    setTimeout(lancerAfficherLeaderboard, 3000)
+                                    setTimeout(lancerAfficherLeaderboard, 10000)
                                     break;
+                                //cas pour joueur qui vote
                                 case "JOUEURVOTE":
                                     ajouterJoueurVote(msg.data);
                                     break;
+                                //cas pour débuter la partie
                                 case "DEBUTER":
-                                    console.log("Let the game begin");
                                     commencerPartie();
                                     break;
+                                //cas pour lancer la phase de vote
                                 case "PHASEVOTE":
                                     afficherPhaseVote()
                                     break;
+                                //cas qui permet au joueuer de completer un vote
                                 case "VOTER":
                                     var msg = {
                                         Categorie: "JEU", Type: "VOTECOMPLETER", Data: msg.Data
                                     }
                                     webSocket.send(JSON.stringify(msg));
                                     break;
+                                //cas qui affiche le leaderboard des joueur
                                 case "LEADERBOARD":
                                     document.getElementById('zonePhrase').style['display'] = 'none';
                                     document.getElementById('zoneVote').style['display'] = 'none';
                                     document.getElementById('zoneResultat').style['display'] = 'none';
                                     document.getElementById('zoneLeaderBoard').style['display'] = 'block';
                                     afficherLeaderboard(msg.Data);
-                                    setTimeout(lancerProchaineRonde, 3000)
+                                    setTimeout(lancerProchaineRonde, 10000)
                                     break;
+                                //cas qui permet de terminer la partie
                                 case "PARTIETERMINER":
+                                    document.getElementById('zonePhrase').style['display'] = 'none';
+                                    document.getElementById('zoneVote').style['display'] = 'none';
+                                    document.getElementById('zoneResultat').style['display'] = 'none';
+                                    document.getElementById('zoneFinPartie').style['display'] = 'block';
+                                    document.getElementById('zoneLeaderBoard').style['display'] = 'block';
+                                    afficherLeaderboard(msg.Data);
                                     break;
                             }
                             break;
@@ -230,10 +250,12 @@
                                     }
                                     webSocket.send(JSON.stringify(msg));
                                     break;
+                                //cas pour ajouter un nouveau joueur
                                 case "NOUVEAUJOUEUR":
                                     console.log("passe ici");
                                     ajouterConnecte(msg.Data);
                                     break;
+                                //cas pour ajouter un nouveau spectateur
                                 case "NOUVEAUSPECTATEUR":
                                     ajouterSpectateur();
                                     break;

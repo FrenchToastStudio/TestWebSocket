@@ -29,6 +29,10 @@ namespace ProjetJeuWSWeb3.Models
             return listePhrase;
         }
 
+        /**
+         * Retourne une phrase au hasard de la base de donné
+         * Return string
+         */
         public string getRandomPhrase() {
             Random rnd = new Random();
             int index = compterNbPhrases();
@@ -37,7 +41,10 @@ namespace ProjetJeuWSWeb3.Models
         }
 
         
-
+        /**
+         * Retourne une phrsae de la base de donné
+         * Return string
+         */
         private string obtenirPhrase(int idPhrase)
         {
             string phrase = "";
@@ -66,6 +73,10 @@ namespace ProjetJeuWSWeb3.Models
             return phrase;
         }
 
+        /**
+         * Retourne une phrsae de la base de donné
+         * Return string
+         */
         private int compterNbPhrases()
         {
             int id = -1;

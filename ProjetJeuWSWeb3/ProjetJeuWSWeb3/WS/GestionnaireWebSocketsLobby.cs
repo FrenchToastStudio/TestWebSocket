@@ -24,6 +24,9 @@ namespace ProjetJeuWSWeb3.WS
 
         }
 
+        /**
+         * envoie a un socket l'action a effectuer
+         */
         private async Task EnvoyerA(Object objet, AspNetWebSocket socket)
         {
             string message = JsonConvert.SerializeObject(objet);
@@ -32,6 +35,10 @@ namespace ProjetJeuWSWeb3.WS
             ArraySegment<byte> envoi = new ArraySegment<byte>(buffer2);
             await socket.SendAsync(envoi, WebSocketMessageType.Text, true, CancellationToken.None);
         }
+
+        /*
+         *Envoie a un joueur l'actiona  effectuer 
+         */
 
         private async Task EnvoyerA(Object objet, string nom)
         {
@@ -64,27 +71,36 @@ namespace ProjetJeuWSWeb3.WS
                 message = JsonConvert.DeserializeObject<Message>(str);
                 switch (message.Categorie)
                 {
+                    
                     case "CONNECTER":
                         switch (message.Type)
                         {
+                            /**
+                             * Ajoute un joueur au lobby de jeu en tant que spectateur, joueur ou host dépendant des condition d'une partie
+                             */
                             case "ADDJOUEUR":
                                 jeu = ServeurLobbyJeu.GetPartieDe(this.idPartie);
 
                                 if (jeu != null)
                                 {
-                                    jeu.AjouterJoueur(message.Data.ToString());
-                                    if (jeu.vérifierSijoueurMaxAtteint() && jeu.VréifierPartieDébuter())
+                                    
+                                    if (jeu.vérifierSijoueurMaxAtteint() || jeu.VréifierPartieDébuter())
                                     {
+                                        jeu.AjouterAudience(message.Data.ToString());
                                         await EnvoyerA(new Message { Categorie = "CONNECTER", Type = "NOUVEAUSPECTATEUR", Data = message.Data.ToString() }, socket);
                                     }
-                                    else if (jeu.lesJoueurs.Count == 1) 
+                                    else if (jeu.lesJoueurs.Count == 0) 
                                     {
+                                        jeu.AjouterJoueur(message.Data.ToString());
                                         aliasHotePartie = message.Data.ToString();
                                         await EnvoyerA(new Message { Categorie = "CONNECTER", Type = "NOUVEAUJOUEUR", Data = message.Data.ToString() }, socket);
                                         await EnvoyerA(new Message { Categorie = "CONNECTE", Type = "PREMIERJOUEUR", Data = message.Data.ToString() }, message.Data.ToString());
                                     }
                                     else
                                     {
+                                        jeu.AjouterJoueur(message.Data.ToString());
+                                        if (jeu.lesJoueurs.Count >= jeu.NbJoueurMinimum)
+                                            await EnvoyerA(new Message { Categorie = "JEU", Type = "PEUTCOMMENCERLOBBY", Data = message.Data.ToString() }, aliasHotePartie);
                                         await EnvoyerA(new Message { Categorie = "CONNECTER", Type = "NOUVEAUJOUEUR", Data = message.Data.ToString() }, socket);
                                     }
                                 }
@@ -94,6 +110,9 @@ namespace ProjetJeuWSWeb3.WS
                     case "JEU":
                         switch (message.Type)
                         {
+                            /**
+                             * Démare la partie
+                             */
                             case "START":
                                 jeu = ServeurLobbyJeu.GetPartieDe(this.idPartie);
                                 if (jeu != null)
